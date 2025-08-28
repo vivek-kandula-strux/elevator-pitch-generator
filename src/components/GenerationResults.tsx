@@ -1,6 +1,7 @@
 import React from 'react';
-import { Download, RefreshCw, Share2, CheckCircle } from 'lucide-react';
+import { Download, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { generatePitchVariations, calculatePitchLength } from '@/utils/elevatorPitchGenerator';
 
 interface FormData {
   name: string;
@@ -19,37 +20,9 @@ interface GenerationResultsProps {
 export default function GenerationResults({ formData, onStartOver }: GenerationResultsProps) {
   const { toast } = useToast();
 
-  const generatedContent = {
-    title: `Custom Content for ${formData.company}`,
-    sections: [
-      {
-        title: "Executive Summary",
-        content: `${formData.company} operates in the ${formData.category.toLowerCase()} sector, distinguished by their unique approach: ${formData.usp}. Our analysis reveals significant opportunities for content optimization tailored to their specific requirements.`
-      },
-      {
-        title: "Key Value Propositions",
-        content: [
-          `✓ Industry Leadership: Established presence in ${formData.category}`,
-          `✓ Unique Advantage: ${formData.usp}`,
-          `✓ Professional Excellence: Commitment to quality and innovation`,
-          `✓ Customer Focus: Tailored solutions for optimal results`
-        ]
-      },
-      {
-        title: "Content Strategy Recommendations",
-        content: `Based on your request for "${formData.specificAsk}", we recommend a multi-channel approach that highlights your unique positioning while addressing your target audience's core needs. The content should emphasize your distinctive value proposition while maintaining professional credibility.`
-      },
-      {
-        title: "Implementation Guidelines",
-        content: [
-          "Deploy content across primary marketing channels",
-          "Maintain consistent brand voice and messaging",
-          "Monitor engagement metrics and adjust accordingly",
-          "Schedule regular content updates and refreshes"
-        ]
-      }
-    ]
-  };
+  const pitchVariations = generatePitchVariations(formData);
+  const primaryPitch = pitchVariations[0];
+  const pitchLength = calculatePitchLength(primaryPitch);
 
   const handleDownload = () => {
     const content = generateTextContent();
@@ -57,7 +30,7 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${formData.company}_content_strategy.txt`;
+    a.download = `${formData.company}_elevator_pitch.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -65,16 +38,16 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
     
     toast({
       title: "Download Complete!",
-      description: "Your content strategy has been saved to your device.",
+      description: "Your elevator pitch has been saved to your device.",
     });
   };
 
   const handleShare = () => {
-    const shareText = `Just generated a custom content strategy for ${formData.company} using the 30-Second Generator! 🚀`;
+    const shareText = `Just generated a custom 30-second elevator pitch for ${formData.company}! 🚀\n\n"${primaryPitch}"`;
     
     if (navigator.share) {
       navigator.share({
-        title: '30-Second Generator Results',
+        title: '30-Second Elevator Pitch Generator',
         text: shareText,
         url: window.location.href
       });
@@ -82,32 +55,30 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
       navigator.clipboard.writeText(shareText);
       toast({
         title: "Copied to clipboard!",
-        description: "Share text has been copied to your clipboard.",
+        description: "Your elevator pitch has been copied to your clipboard.",
       });
     }
   };
 
   const generateTextContent = () => {
-    let content = `${generatedContent.title}\n`;
+    let content = `30-Second Elevator Pitch for ${formData.company}\n`;
     content += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
     content += `Client Information:\n`;
     content += `Name: ${formData.name}\n`;
     content += `Company: ${formData.company}\n`;
     content += `Category: ${formData.category}\n`;
     content += `Contact: ${formData.whatsapp}\n\n`;
-    
-    generatedContent.sections.forEach(section => {
-      content += `${section.title}\n`;
-      content += `${'='.repeat(section.title.length)}\n`;
-      if (Array.isArray(section.content)) {
-        section.content.forEach(item => {
-          content += `${item}\n`;
-        });
-      } else {
-        content += `${section.content}\n`;
-      }
-      content += '\n';
+    content += `PRIMARY PITCH (${pitchLength} seconds):\n`;
+    content += `${primaryPitch}\n\n`;
+    content += `ALTERNATIVE VERSIONS:\n`;
+    pitchVariations.slice(1).forEach((pitch, index) => {
+      content += `Version ${index + 2}: ${pitch}\n\n`;
     });
+    content += `USAGE TIPS:\n`;
+    content += `• Practice your pitch until it flows naturally\n`;
+    content += `• Adjust the pace to fit exactly 30 seconds\n`;
+    content += `• Use confident body language and eye contact\n`;
+    content += `• End with a clear call to action\n`;
     
     return content;
   };
@@ -120,10 +91,10 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
           <CheckCircle className="w-16 h-16 text-success" />
         </div>
         <h1 className="text-3xl font-bold text-foreground mb-3">
-          Content Generated Successfully! 🎉
+          Your 30-Second Elevator Pitch is Ready! 🎉
         </h1>
         <p className="text-lg text-muted-foreground">
-          Your personalized content strategy is ready for {formData.company}
+          Here's your compelling elevator pitch for {formData.company}
         </p>
       </div>
 
@@ -149,55 +120,79 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
             className="btn-secondary flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            Generate New Content
+            Generate New Pitch
           </button>
         </div>
       </div>
 
-      {/* Generated Content */}
-      <div className="form-card p-8">
-        <h2 className="text-2xl font-bold text-foreground mb-6">
-          {generatedContent.title}
-        </h2>
+      {/* Primary Pitch */}
+      <div className="form-card p-8 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-foreground">
+            Your Primary Pitch
+          </h2>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            ~{pitchLength} seconds
+          </div>
+        </div>
         
-        <div className="space-y-8">
-          {generatedContent.sections.map((section, index) => (
-            <div key={index} className="border-l-4 border-primary pl-6">
-              <h3 className="text-xl font-semibold text-foreground mb-3">
-                {section.title}
-              </h3>
-              <div className="text-muted-foreground">
-                {Array.isArray(section.content) ? (
-                  <ul className="space-y-2">
-                    {section.content.map((item, itemIndex) => (
-                      <li key={itemIndex} className="leading-relaxed">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="leading-relaxed">
-                    {section.content}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="bg-primary-light rounded-lg p-6 mb-6">
+          <p className="text-lg leading-relaxed text-primary font-medium">
+            "{primaryPitch}"
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-success rounded-full"></div>
+            <span>Optimized for 30 seconds</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-success rounded-full"></div>
+            <span>Highlights your USP</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-success rounded-full"></div>
+            <span>Clear call to action</span>
+          </div>
         </div>
       </div>
+
+      {/* Alternative Versions */}
+      {pitchVariations.length > 1 && (
+        <div className="form-card p-8">
+          <h3 className="text-xl font-semibold text-foreground mb-4">
+            Alternative Versions
+          </h3>
+          <div className="space-y-4">
+            {pitchVariations.slice(1).map((pitch, index) => (
+              <div key={index} className="border-l-4 border-secondary pl-4">
+                <p className="text-muted-foreground leading-relaxed">
+                  "{pitch}"
+                </p>
+                <span className="text-xs text-muted-foreground mt-2 block">
+                  Version {index + 2} • ~{calculatePitchLength(pitch)} seconds
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Contact Information */}
       <div className="form-card p-6 mt-8 bg-primary-light">
         <h3 className="text-lg font-semibold text-primary mb-3">
-          Next Steps
+          Practice Tips
         </h3>
         <p className="text-primary mb-4">
-          We'll send a detailed copy to your WhatsApp number: <strong>{formData.whatsapp}</strong>
+          Your pitch is ready! Contact: <strong>{formData.whatsapp}</strong>
         </p>
         <div className="text-sm text-primary/80 space-y-1">
-          <p>• Implementation support available</p>
-          <p>• Questions? Contact us via WhatsApp</p>
-          <p>• Generated content is ready for immediate use</p>
+          <p>• Practice until it flows naturally (aim for exactly 30 seconds)</p>
+          <p>• Use confident body language and maintain eye contact</p>
+          <p>• End with a clear question or call to action</p>
+          <p>• Adjust the pace based on your speaking style</p>
         </div>
       </div>
     </div>

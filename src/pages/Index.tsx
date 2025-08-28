@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import BusinessForm from '@/components/BusinessForm';
-import GenerationProgress from '@/components/GenerationProgress';
 import GenerationResults from '@/components/GenerationResults';
 
 interface FormData {
@@ -12,7 +11,7 @@ interface FormData {
   specificAsk: string;
 }
 
-type AppState = 'form' | 'generating' | 'results';
+type AppState = 'form' | 'results';
 
 const Index = () => {
   const [currentState, setCurrentState] = useState<AppState>('form');
@@ -20,10 +19,6 @@ const Index = () => {
 
   const handleFormSubmit = (data: FormData) => {
     setFormData(data);
-    setCurrentState('generating');
-  };
-
-  const handleGenerationComplete = () => {
     setCurrentState('results');
   };
 
@@ -39,12 +34,6 @@ const Index = () => {
           <BusinessForm 
             onSubmit={handleFormSubmit}
             isLoading={false}
-          />
-        )}
-        
-        {currentState === 'generating' && (
-          <GenerationProgress 
-            onComplete={handleGenerationComplete}
           />
         )}
         

@@ -69,7 +69,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
     }
 
     if (!formData.specificAsk.trim()) {
-      newErrors.specificAsk = 'Please specify what you want generated';
+      newErrors.specificAsk = 'Please describe your target audience and goals';
     }
 
     setErrors(newErrors);
@@ -82,7 +82,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
     if (validateForm()) {
       toast({
         title: "Form Submitted!",
-        description: "Starting content generation...",
+        description: "Generating your elevator pitch...",
       });
       onSubmit(formData);
     } else {
@@ -106,10 +106,10 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
     <div className="form-card p-8 max-w-2xl mx-auto animate-fade-in">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-foreground mb-3">
-          30-Second Generator
+          30-Second Elevator Pitch Generator
         </h1>
         <p className="text-lg text-muted-foreground text-balance">
-          Share your business details and get personalized content in just 30 seconds
+          Share your business details and get a compelling 30-second elevator pitch instantly
         </p>
       </div>
 
@@ -215,11 +215,11 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
         {/* Specific Ask Field */}
         <div>
           <label className="form-label">
-            What do you want generated? *
+            Target Audience & Goals *
           </label>
           <textarea
             className={`form-input min-h-[100px] resize-y ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}
-            placeholder="Be specific: social media posts, email templates, product descriptions, marketing copy, etc."
+            placeholder="Who is your target audience? What do you want them to do after hearing your pitch?"
             value={formData.specificAsk}
             onChange={(e) => handleInputChange('specificAsk', e.target.value)}
             disabled={isLoading}
@@ -242,7 +242,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
                 Generating...
               </span>
             ) : (
-              'Generate Content in 30 Seconds'
+              'Generate My 30-Second Pitch'
             )}
           </button>
         </div>
