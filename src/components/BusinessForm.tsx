@@ -93,7 +93,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
         <div className="inline-flex items-center gap-3 mb-6">
           <div className="w-3 h-3 rounded-full bg-gradient-primary animate-pulse-glow"></div>
           <div className="text-sm font-medium text-primary-ultra tracking-wide uppercase">
-            AI-Powered Generation
+            Strux Digital Presents
           </div>
         </div>
         <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
