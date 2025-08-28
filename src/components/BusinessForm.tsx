@@ -192,7 +192,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
         {/* Specific Ask Field */}
         <div>
           <label className="form-label">
-            Target Audience & Goals *
+            Specific Ask *
           </label>
           <textarea
             className={`form-input min-h-[100px] resize-y ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}

@@ -44,7 +44,7 @@
     
     /* Electric cyan primary */
     --primary: 193 100% 50%;
-    --primary-foreground: 220 26% 14%;
+    --primary-foreground: 0 0% 100%;
     --primary-hover: 193 100% 45%;
     --primary-glow: 193 100% 70%;
     
