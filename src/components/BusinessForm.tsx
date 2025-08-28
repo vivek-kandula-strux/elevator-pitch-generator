@@ -172,9 +172,7 @@ export default function BusinessForm({
 
         {/* Specific Ask Field */}
         <div className="space-y-3">
-          <label className="form-label">
-            Target Audience & Goals *
-          </label>
+          <label className="form-label">My Specific ask</label>
           <div className="relative">
             <textarea className={`form-input min-h-[120px] resize-none ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`} value={formData.specificAsk} onChange={e => handleInputChange('specificAsk', e.target.value)} disabled={isLoading} />
             <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
@@ -195,9 +193,7 @@ export default function BusinessForm({
                 <span className="font-semibold">Generating Your Pitch...</span>
               </span> : <span className="flex items-center justify-center gap-3">
                 <span className="font-semibold">Generate my 30-Seconds</span>
-                <div className="w-5 h-5 rounded-full bg-primary-foreground/20 flex items-center justify-center transition-transform group-hover:scale-110">
-                  ✨
-                </div>
+                
               </span>}
           </button>
         </div>
