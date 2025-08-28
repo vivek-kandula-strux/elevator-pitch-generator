@@ -194,7 +194,7 @@ export default function BusinessForm({
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
                 <span className="font-semibold">Generating Your Pitch...</span>
               </span> : <span className="flex items-center justify-center gap-3">
-                <span className="font-semibold">Generate My 30-Second Pitch</span>
+                <span className="font-semibold">Generate my 30-Seconds</span>
                 <div className="w-5 h-5 rounded-full bg-primary-foreground/20 flex items-center justify-center transition-transform group-hover:scale-110">
                   ✨
                 </div>
