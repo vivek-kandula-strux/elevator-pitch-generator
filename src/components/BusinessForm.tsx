@@ -116,7 +116,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="text"
               className={`form-input ${errors.name ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="Enter your full name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               disabled={isLoading}
@@ -137,7 +136,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="tel"
               className={`form-input ${errors.whatsapp ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="+1 (555) 123-4567"
               value={formData.whatsapp}
               onChange={(e) => handleInputChange('whatsapp', e.target.value)}
               disabled={isLoading}
@@ -160,7 +158,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="text"
               className={`form-input ${errors.company ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="Your company or startup name"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
               disabled={isLoading}
@@ -181,7 +178,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="text"
               className={`form-input ${errors.category ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="e.g. SaaS, E-commerce, FinTech, Healthcare"
               value={formData.category}
               onChange={(e) => handleInputChange('category', e.target.value)}
               disabled={isLoading}
@@ -203,7 +199,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
           <div className="relative">
             <textarea
               className={`form-input min-h-[120px] resize-none ${errors.usp ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="What makes your business unique? What problem do you solve better than anyone else?"
               value={formData.usp}
               onChange={(e) => handleInputChange('usp', e.target.value)}
               disabled={isLoading}
@@ -228,7 +223,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
           <div className="relative">
             <textarea
               className={`form-input min-h-[120px] resize-none ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="Who is your ideal customer? What do you want to achieve with this pitch? (e.g., find investors, attract customers, recruit talent)"
               value={formData.specificAsk}
               onChange={(e) => handleInputChange('specificAsk', e.target.value)}
               disabled={isLoading}

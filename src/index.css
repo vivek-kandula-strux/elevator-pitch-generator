@@ -162,7 +162,7 @@
   }
   
   .form-input {
-    @apply w-full px-5 py-4 text-foreground placeholder:text-muted-foreground rounded-xl transition-all duration-300 focus:outline-none;
+    @apply w-full px-5 py-4 text-foreground rounded-xl transition-all duration-300 focus:outline-none;
     background: hsl(var(--input-background));
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--input-border));
