@@ -67,10 +67,18 @@ export default function GenerationResults({
       <div className="glass-card rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 mb-6 md:mb-10 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
         
+        {/* Ready to Use Status Badge */}
+        <div className="flex justify-center mb-6 md:mb-8">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20">
+            <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+            <span className="text-sm font-medium text-success">Ready to Use</span>
+          </div>
+        </div>
+        
         <div className="bg-gradient-glass rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8 border border-card-border/30 relative">
           <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none"></div>
           
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-start mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <Clock className="w-5 h-5 text-primary" />
@@ -83,10 +91,6 @@ export default function GenerationResults({
                   {calculatePitchLength(primaryPitch)} seconds
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 border border-success/20">
-              <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-              <span className="text-sm font-medium text-success">Optimized</span>
             </div>
           </div>
           
