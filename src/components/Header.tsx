@@ -16,7 +16,7 @@ const Header = () => {
           {/* Logo/Brand */}
           <div className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/8530f685-76d2-4feb-9bb2-4c8d8e5e4180.png" 
+              src="https://images.lovable.dev/8530f685-76d2-4feb-9bb2-4c8d8e5e4180.png" 
               alt="Strux Digital Logo" 
               className="h-8 w-auto"
             />
