@@ -1,7 +1,6 @@
 import React from 'react';
 import { Copy, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 interface FormData {
   name: string;
   whatsapp: string;
@@ -10,43 +9,41 @@ interface FormData {
   usp: string;
   specificAsk: string;
 }
-
 interface GenerationData extends FormData {
   generatedPitch: string;
   recordId: string;
 }
-
 interface GenerationResultsProps {
   formData: FormData | null;
   generationData: GenerationData;
   onStartOver: () => void;
 }
-
-export default function GenerationResults({ formData, generationData, onStartOver }: GenerationResultsProps) {
-  const { toast } = useToast();
-
+export default function GenerationResults({
+  formData,
+  generationData,
+  onStartOver
+}: GenerationResultsProps) {
+  const {
+    toast
+  } = useToast();
   const primaryPitch = generationData.generatedPitch;
   const pitchLength = calculatePitchLength(primaryPitch);
-
   function calculatePitchLength(pitch: string): number {
     // Average speaking pace is about 150 words per minute
     // For a 30-second pitch, that's roughly 75 words
     const words = pitch.split(' ').length;
-    const estimatedSeconds = Math.round((words / 150) * 60);
+    const estimatedSeconds = Math.round(words / 150 * 60);
     return estimatedSeconds;
   }
-
   const handleCopy = () => {
     navigator.clipboard.writeText(primaryPitch);
     toast({
       title: "Copied to clipboard!",
-      description: "Your elevator pitch has been copied to your clipboard.",
+      description: "Your elevator pitch has been copied to your clipboard."
     });
   };
-
   const handleShare = () => {
     const shareText = `Just generated a custom 30-second elevator pitch for ${generationData.company}! 🚀\n\n"${primaryPitch}"`;
-    
     if (navigator.share) {
       navigator.share({
         title: '30-Second Elevator Pitch Generator',
@@ -57,48 +54,32 @@ export default function GenerationResults({ formData, generationData, onStartOve
       navigator.clipboard.writeText(shareText);
       toast({
         title: "Copied to clipboard!",
-        description: "Your elevator pitch has been copied to your clipboard.",
+        description: "Your elevator pitch has been copied to your clipboard."
       });
     }
   };
-
-
-  return (
-    <div className="max-w-4xl mx-auto animate-fade-in">
+  return <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Success Header */}
       <div className="form-card p-8 mb-8 text-center">
-        <div className="flex justify-center mb-4">
-          <CheckCircle className="w-16 h-16 text-success" />
-        </div>
-        <h1 className="text-3xl font-bold text-foreground mb-3">
+        
+        <h1 className="font-bold text-foreground mb-3 text-base px-0 py-0 my-0 mx-0">
           Your 30-Second Elevator Pitch is Ready! 🎉
         </h1>
-        <p className="text-lg text-muted-foreground">
-          Here's your AI-generated elevator pitch for {generationData.company}
-        </p>
+        
       </div>
 
       {/* Action Buttons */}
       <div className="form-card p-6 mb-8">
         <div className="flex flex-wrap gap-4 justify-center">
-          <button
-            onClick={handleCopy}
-            className="btn-primary flex items-center gap-2"
-          >
+          <button onClick={handleCopy} className="btn-primary flex items-center gap-2">
             <Copy className="w-4 h-4" />
             Copy Pitch
           </button>
-          <button
-            onClick={handleShare}
-            className="btn-secondary flex items-center gap-2"
-          >
+          <button onClick={handleShare} className="btn-secondary flex items-center gap-2">
             <Share2 className="w-4 h-4" />
             Share
           </button>
-          <button
-            onClick={onStartOver}
-            className="btn-secondary flex items-center gap-2"
-          >
+          <button onClick={onStartOver} className="btn-secondary flex items-center gap-2">
             <RefreshCw className="w-4 h-4" />
             Generate New Pitch
           </button>
@@ -166,10 +147,5 @@ export default function GenerationResults({ formData, generationData, onStartOve
         </div>
       </div>
 
-      {/* Branding */}
-      <div className="text-center mt-8 text-sm text-muted-foreground">
-        <p>Powered by <span className="text-primary font-medium">Strux Digital</span></p>
-      </div>
-    </div>
-  );
+    </div>;
 }
