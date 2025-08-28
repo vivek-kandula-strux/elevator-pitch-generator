@@ -52,33 +52,33 @@ export default function GenerationResults({
             Generation Complete
           </div>
         </div>
-        <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
           Your Elevator Pitch is{' '}
           <span className="bg-gradient-primary bg-clip-text text-transparent">
             Ready!
           </span>
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
           Here's your professionally crafted 30-second elevator pitch, optimized for maximum impact
         </p>
       </div>
 
       {/* Main Pitch Display */}
-      <div className="glass-card rounded-3xl p-10 mb-10 relative overflow-hidden">
+      <div className="glass-card rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 mb-6 md:mb-10 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
         
-        <div className="flex justify-between items-center mb-8">
-          <button onClick={handleCopy} className="btn-primary flex items-center gap-3 px-6 py-3">
+        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-6 md:mb-8">
+          <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 sm:py-3 min-h-[44px] w-full sm:w-auto">
             <Copy className="w-5 h-5" />
             <span className="font-semibold">Copy Pitch</span>
           </button>
-          <button onClick={onStartOver} className="btn-secondary flex items-center gap-3 px-6 py-3">
+          <button onClick={onStartOver} className="btn-secondary flex items-center justify-center gap-3 px-6 py-4 sm:py-3 min-h-[44px] w-full sm:w-auto">
             <RefreshCw className="w-5 h-5" />
             <span className="font-medium">Generate New Pitch</span>
           </button>
         </div>
 
-        <div className="bg-gradient-glass rounded-2xl p-8 mb-8 border border-card-border/30 relative">
+        <div className="bg-gradient-glass rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8 border border-card-border/30 relative">
           <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none"></div>
           
           <div className="flex items-center justify-between mb-6">
@@ -103,7 +103,7 @@ export default function GenerationResults({
           
           <div className="relative">
             <div className="absolute -left-2 top-0 w-1 h-full bg-gradient-primary rounded-full"></div>
-            <blockquote className="text-xl leading-relaxed text-foreground font-medium pl-6 relative">
+            <blockquote className="text-lg md:text-xl leading-relaxed text-foreground font-medium pl-6 relative">
               <span className="text-4xl text-primary/30 absolute -top-2 -left-4">"</span>
               {primaryPitch}
               <span className="text-4xl text-primary/30 absolute -bottom-6 right-0">"</span>
@@ -112,17 +112,17 @@ export default function GenerationResults({
         </div>
 
         {/* Enhanced Usage Guidelines */}
-        <div className="glass-card rounded-2xl p-8 relative overflow-hidden">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
           
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
               <span className="text-xl">💡</span>
             </div>
-            <h3 className="text-xl font-bold text-foreground">Maximize Your Pitch Impact</h3>
+            <h3 className="text-lg md:text-xl font-bold text-foreground">Maximize Your Pitch Impact</h3>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -191,9 +191,9 @@ export default function GenerationResults({
       </div>
 
       {/* Enhanced Company Information */}
-      <div className="text-center mt-12 space-y-4">
-        <div className="glass-card rounded-xl p-6 max-w-2xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+      <div className="text-center mt-8 md:mt-12 space-y-4">
+        <div className="glass-card rounded-xl p-4 sm:p-6 max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="flex flex-col items-center gap-2">
               <span className="text-muted-foreground uppercase tracking-wide">Company</span>
               <span className="font-semibold text-foreground">{generationData.company}</span>
