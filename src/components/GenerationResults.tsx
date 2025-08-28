@@ -67,14 +67,10 @@ export default function GenerationResults({
       <div className="glass-card rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 mb-6 md:mb-10 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
         
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center mb-6 md:mb-8">
-          <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 sm:py-3 min-h-[44px] w-full sm:w-auto">
+        <div className="flex justify-center mb-6 md:mb-8">
+          <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
             <Copy className="w-5 h-5" />
             <span className="font-semibold">Copy Pitch</span>
-          </button>
-          <button onClick={onStartOver} className="btn-secondary flex items-center justify-center gap-3 px-6 py-4 sm:py-3 min-h-[44px] w-full sm:w-auto">
-            <RefreshCw className="w-5 h-5" />
-            <span className="font-medium">Generate New Pitch</span>
           </button>
         </div>
 
@@ -101,14 +97,26 @@ export default function GenerationResults({
             </div>
           </div>
           
-          <div className="relative">
+          <div className="relative h-32 sm:h-40">
             <div className="absolute -left-2 top-0 w-1 h-full bg-gradient-primary rounded-full"></div>
-            <blockquote className="text-lg md:text-xl leading-relaxed text-foreground font-medium pl-6 relative">
-              <span className="text-4xl text-primary/30 absolute -top-2 -left-4">"</span>
-              {primaryPitch}
-              <span className="text-4xl text-primary/30 absolute -bottom-6 right-0">"</span>
-            </blockquote>
+            <div className="pl-6 h-full overflow-hidden">
+              <div className="h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20">
+                <blockquote className="text-sm sm:text-base leading-relaxed text-foreground font-medium relative">
+                  <span className="text-2xl text-primary/30 absolute -top-1 -left-4">"</span>
+                  {primaryPitch}
+                  <span className="text-2xl text-primary/30 absolute -bottom-3 right-0">"</span>
+                </blockquote>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Generate New Pitch Button */}
+        <div className="flex justify-center mb-6 md:mb-8">
+          <button onClick={onStartOver} className="btn-secondary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
+            <RefreshCw className="w-5 h-5" />
+            <span className="font-medium">Generate New Pitch</span>
+          </button>
         </div>
 
         {/* Enhanced Usage Guidelines */}
@@ -187,31 +195,6 @@ export default function GenerationResults({
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Enhanced Company Information */}
-      <div className="text-center mt-8 md:mt-12 space-y-4">
-        <div className="glass-card rounded-xl p-4 sm:p-6 max-w-2xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-muted-foreground uppercase tracking-wide">Company</span>
-              <span className="font-semibold text-foreground">{generationData.company}</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-muted-foreground uppercase tracking-wide">Category</span>
-              <span className="font-semibold text-foreground">{generationData.category}</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-muted-foreground uppercase tracking-wide">Generated For</span>
-              <span className="font-semibold text-foreground">{generationData.name}</span>
-            </div>
-          </div>
-        </div>
-        <div className="text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-2">
-            ✨ Data automatically synced to Google Sheets
-          </span>
         </div>
       </div>
     </div>;
