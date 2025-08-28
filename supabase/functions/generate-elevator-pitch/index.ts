@@ -105,6 +105,24 @@ Return only the elevator pitch text, no additional formatting or explanations.`;
 
     console.log('Successfully generated pitch for:', formData.company);
 
+    // Automatically sync to Google Sheets in the background
+    EdgeRuntime.waitUntil(
+      (async () => {
+        try {
+          console.log('Starting automatic Google Sheets sync...');
+          const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-to-google-sheets');
+          
+          if (syncError) {
+            console.error('Background sync error:', syncError);
+          } else {
+            console.log('Background sync successful:', syncData);
+          }
+        } catch (syncError) {
+          console.error('Background sync failed:', syncError);
+        }
+      })()
+    );
+
     return new Response(JSON.stringify({ 
       generatedPitch,
       recordId: insertedData.id 
