@@ -166,6 +166,10 @@ export default function GenerationResults({ formData, generationData, onStartOve
         </div>
       </div>
 
+      {/* Branding */}
+      <div className="text-center mt-8 text-sm text-muted-foreground">
+        <p>Powered by <span className="text-primary font-medium">Strux Digital</span></p>
+      </div>
     </div>
   );
 }

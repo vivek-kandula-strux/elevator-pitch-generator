@@ -123,7 +123,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="text"
               className={`form-input ${errors.name ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="Enter your full name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               disabled={isLoading}
@@ -141,7 +140,7 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="tel"
               className={`form-input ${errors.whatsapp ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="+1 (555) 123-4567"
+              placeholder="WhatsApp Number"
               value={formData.whatsapp}
               onChange={(e) => handleInputChange('whatsapp', e.target.value)}
               disabled={isLoading}
@@ -161,7 +160,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <input
               type="text"
               className={`form-input ${errors.company ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="Your company name"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
               disabled={isLoading}
@@ -202,7 +200,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
           </label>
           <textarea
             className={`form-input min-h-[100px] resize-y ${errors.usp ? 'border-destructive focus:border-destructive' : ''}`}
-            placeholder="What makes your business unique? What value do you provide to customers?"
             value={formData.usp}
             onChange={(e) => handleInputChange('usp', e.target.value)}
             disabled={isLoading}
@@ -219,7 +216,6 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
           </label>
           <textarea
             className={`form-input min-h-[100px] resize-y ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}
-            placeholder="Who is your target audience? What do you want them to do after hearing your pitch?"
             value={formData.specificAsk}
             onChange={(e) => handleInputChange('specificAsk', e.target.value)}
             disabled={isLoading}
@@ -248,8 +244,9 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
         </div>
       </form>
 
-      <div className="text-center mt-6 text-sm text-muted-foreground">
+      <div className="text-center mt-6 text-sm text-muted-foreground space-y-2">
         <p>✓ Secure processing • ✓ No spam • ✓ Professional results</p>
+        <p>Powered by <span className="text-primary font-medium">Strux Digital</span></p>
       </div>
     </div>
   );
