@@ -97,9 +97,8 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
           </div>
         </div>
         <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
-          30-Second Elevator Pitch{' '}
           <span className="bg-gradient-primary bg-clip-text text-transparent">
-            Generator
+            30 Second Generator
           </span>
         </h1>
         <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto font-medium">
