@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
+import { Copy, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface FormData {
@@ -36,21 +36,11 @@ export default function GenerationResults({ formData, generationData, onStartOve
     return estimatedSeconds;
   }
 
-  const handleDownload = () => {
-    const content = generateTextContent();
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${generationData.company}_elevator_pitch.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
+  const handleCopy = () => {
+    navigator.clipboard.writeText(primaryPitch);
     toast({
-      title: "Download Complete!",
-      description: "Your elevator pitch has been saved to your device.",
+      title: "Copied to clipboard!",
+      description: "Your elevator pitch has been copied to your clipboard.",
     });
   };
 
@@ -72,24 +62,6 @@ export default function GenerationResults({ formData, generationData, onStartOve
     }
   };
 
-  const generateTextContent = () => {
-    let content = `30-Second Elevator Pitch for ${generationData.company}\n`;
-    content += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
-    content += `Client Information:\n`;
-    content += `Name: ${generationData.name}\n`;
-    content += `Company: ${generationData.company}\n`;
-    content += `Category: ${generationData.category}\n`;
-    content += `Contact: ${generationData.whatsapp}\n\n`;
-    content += `AI-GENERATED PITCH (${pitchLength} seconds):\n`;
-    content += `${primaryPitch}\n\n`;
-    content += `USAGE TIPS:\n`;
-    content += `• Practice your pitch until it flows naturally\n`;
-    content += `• Adjust the pace to fit exactly 30 seconds\n`;
-    content += `• Use confident body language and eye contact\n`;
-    content += `• End with a clear call to action\n`;
-    
-    return content;
-  };
 
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
@@ -110,11 +82,11 @@ export default function GenerationResults({ formData, generationData, onStartOve
       <div className="form-card p-6 mb-8">
         <div className="flex flex-wrap gap-4 justify-center">
           <button
-            onClick={handleDownload}
+            onClick={handleCopy}
             className="btn-primary flex items-center gap-2"
           >
-            <Download className="w-4 h-4" />
-            Download Results
+            <Copy className="w-4 h-4" />
+            Copy Pitch
           </button>
           <button
             onClick={handleShare}
@@ -194,21 +166,6 @@ export default function GenerationResults({ formData, generationData, onStartOve
         </div>
       </div>
 
-      {/* Contact Information */}
-      <div className="form-card p-6 mt-8 bg-primary-light">
-        <h3 className="text-lg font-semibold text-primary mb-3">
-          Practice Tips
-        </h3>
-        <p className="text-primary mb-4">
-          Your pitch is ready! Contact: <strong>{generationData.whatsapp}</strong>
-        </p>
-        <div className="text-sm text-primary/80 space-y-1">
-          <p>• Practice until it flows naturally (aim for exactly 30 seconds)</p>
-          <p>• Use confident body language and maintain eye contact</p>
-          <p>• End with a clear question or call to action</p>
-          <p>• Adjust the pace based on your speaking style</p>
-        </div>
-      </div>
     </div>
   );
 }
