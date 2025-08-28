@@ -90,9 +90,9 @@ export default function BusinessForm({
             Strux Digital Presents
           </div>
         </div>
-        <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight text-center">
+        <h1 className="font-bold text-foreground mb-4 tracking-tight text-4xl">
           <span className="bg-gradient-primary bg-clip-text text-transparent">
-            30 Seconds Generator
+            30 Second Generator
           </span>
         </h1>
         <p className="text-balance max-w-2xl mx-auto font-medium text-red-50 text-sm">
