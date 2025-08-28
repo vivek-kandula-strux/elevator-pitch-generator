@@ -54,6 +54,13 @@ export default function GenerationResults({
           </div>
         </div>
         
+        {/* Your 30 Seconds is Ready Heading */}
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent tracking-tight">
+            Your 30 Seconds is Ready
+          </h1>
+        </div>
+        
         <div className="bg-gradient-glass rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8 border border-card-border/30 relative">
           <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none"></div>
           
