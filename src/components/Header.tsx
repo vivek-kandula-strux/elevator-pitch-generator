@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/Logo';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -12,7 +13,17 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-center h-16 relative">
+        <div className="flex items-center justify-between h-16 relative">
+          {/* Logo - Left on desktop, hidden on mobile */}
+          <div className="hidden md:flex items-center">
+            <Logo className="h-8 md:h-10 w-auto" />
+          </div>
+          
+          {/* Mobile Logo Center */}
+          <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
+            <Logo className="h-8 w-auto" />
+          </div>
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             <a 
