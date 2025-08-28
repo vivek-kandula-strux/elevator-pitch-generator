@@ -25,17 +25,48 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting Google Sheets sync...')
+    
     // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Get Google Sheets credentials
-    const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL')!
-    const privateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')!.replace(/\\n/g, '\n')
-    const sheetId = Deno.env.get('GOOGLE_SHEET_ID')!
+    // Get Google Sheets credentials from environment
+    const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL')
+    const rawPrivateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')
+    const sheetId = Deno.env.get('GOOGLE_SHEET_ID')
 
-    console.log('Starting Google Sheets sync...')
+    if (!clientEmail || !rawPrivateKey || !sheetId) {
+      throw new Error('Missing Google Sheets credentials. Please ensure GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY, and GOOGLE_SHEET_ID are set.')
+    }
+
+    console.log('Credentials found, processing private key...')
+
+    // Clean and format the private key
+    let privateKey: string
+    try {
+      // Remove quotes if present and handle escaped newlines
+      privateKey = rawPrivateKey
+        .replace(/^"|"$/g, '') // Remove surrounding quotes
+        .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
+        .trim()
+      
+      // Validate private key format
+      if (!privateKey.includes('-----BEGIN PRIVATE KEY-----') || !privateKey.includes('-----END PRIVATE KEY-----')) {
+        throw new Error('Invalid private key format - must be a valid PEM formatted private key')
+      }
+      
+      console.log('Private key processed successfully')
+    } catch (keyError) {
+      console.error('Private key processing error:', keyError)
+      throw new Error(`Failed to process private key: ${keyError.message}`)
+    }
 
     // Fetch all elevator pitches from database
     const { data: pitches, error: fetchError } = await supabase
@@ -73,12 +104,20 @@ serve(async (req) => {
     const signatureInput = `${headerB64}.${payloadB64}`
     
     // Import the private key for signing
-    const privateKeyFormatted = privateKey
-      .replace('-----BEGIN PRIVATE KEY-----', '')
-      .replace('-----END PRIVATE KEY-----', '')
-      .replace(/\s/g, '')
-    
-    const binaryKey = Uint8Array.from(atob(privateKeyFormatted), c => c.charCodeAt(0))
+    let binaryKey: Uint8Array
+    try {
+      const privateKeyFormatted = privateKey
+        .replace('-----BEGIN PRIVATE KEY-----', '')
+        .replace('-----END PRIVATE KEY-----', '')
+        .replace(/\s/g, '')
+      
+      console.log('Attempting to decode private key...')
+      binaryKey = Uint8Array.from(atob(privateKeyFormatted), c => c.charCodeAt(0))
+      console.log('Private key decoded successfully')
+    } catch (decodeError) {
+      console.error('Base64 decode error:', decodeError)
+      throw new Error(`Failed to decode private key: ${decodeError.message}. Please ensure the private key is properly formatted.`)
+    }
     
     const cryptoKey = await crypto.subtle.importKey(
       'pkcs8',
