@@ -84,11 +84,12 @@ export default function BusinessForm({
   };
   return <div className="form-card p-4 md:p-6 lg:p-10 max-w-3xl mx-auto animate-fade-in">
       <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-3 mb-6">
-          <div className="w-3 h-3 rounded-full bg-gradient-primary animate-pulse-glow"></div>
-          <div className="text-sm font-medium text-primary-ultra tracking-wide uppercase">
+        <div className="inline-flex items-center gap-3 mb-8">
+          <div className="w-4 h-4 rounded-full bg-gradient-primary animate-pulse-glow"></div>
+          <div className="text-lg font-bold text-primary-ultra tracking-wide uppercase">
             Strux Digital Presents
           </div>
+          <div className="w-4 h-4 rounded-full bg-gradient-primary animate-pulse-glow"></div>
         </div>
         <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
           <span className="bg-gradient-primary bg-clip-text text-transparent">
@@ -200,10 +201,17 @@ export default function BusinessForm({
       </form>
 
       <div className="text-center mt-8 space-y-4">
-        
-        <p className="text-sm text-muted-foreground">
-          Powered by <span className="text-primary font-semibold bg-gradient-primary bg-clip-text text-transparent">Strux Digital</span>
-        </p>
+        <div className="glass-card rounded-xl p-4 max-w-md mx-auto">
+          <p className="text-sm text-muted-foreground mb-2">
+            Powered by
+          </p>
+          <div className="text-xl font-bold">
+            <span className="bg-gradient-primary bg-clip-text text-transparent">Strux Digital</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            AI-Powered Business Solutions
+          </p>
+        </div>
       </div>
     </div>;
 }
