@@ -192,7 +192,7 @@ export default function BusinessForm({
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
                 <span className="font-semibold">Generating Your Pitch...</span>
               </span> : <span className="flex items-center justify-center gap-3">
-                <span className="font-medium text-sm text-center">Generate my 30-Seconds</span>
+                <span className="text-center text-sm font-bold">Generate my 30-Seconds</span>
                 
               </span>}
           </button>
