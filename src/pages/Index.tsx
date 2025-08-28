@@ -73,7 +73,7 @@ const Index = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-subtle pt-20 py-12 px-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-subtle pt-20 py-12 relative overflow-hidden">
       {/* Background Enhancement */}
       <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none"></div>
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float"></div>
