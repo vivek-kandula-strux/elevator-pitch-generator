@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import BusinessForm from '@/components/BusinessForm';
 import GenerationResults from '@/components/GenerationResults';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface FormData {
   name: string;
@@ -11,20 +13,60 @@ interface FormData {
   specificAsk: string;
 }
 
+interface GenerationData extends FormData {
+  generatedPitch: string;
+  recordId: string;
+}
+
 type AppState = 'form' | 'results';
 
 const Index = () => {
   const [currentState, setCurrentState] = useState<AppState>('form');
   const [formData, setFormData] = useState<FormData | null>(null);
+  const [generationData, setGenerationData] = useState<GenerationData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleFormSubmit = (data: FormData) => {
+  const handleFormSubmit = async (data: FormData) => {
+    setIsLoading(true);
     setFormData(data);
-    setCurrentState('results');
+    
+    try {
+      const { data: result, error } = await supabase.functions.invoke('generate-elevator-pitch', {
+        body: { formData: data }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setGenerationData({
+        ...data,
+        generatedPitch: result.generatedPitch,
+        recordId: result.recordId
+      });
+      setCurrentState('results');
+      
+      toast({
+        title: "Success!",
+        description: "Your elevator pitch has been generated and saved.",
+      });
+    } catch (error) {
+      console.error('Error generating pitch:', error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Unable to generate your elevator pitch. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleStartOver = () => {
     setCurrentState('form');
     setFormData(null);
+    setGenerationData(null);
   };
 
   return (
@@ -33,13 +75,14 @@ const Index = () => {
         {currentState === 'form' && (
           <BusinessForm 
             onSubmit={handleFormSubmit}
-            isLoading={false}
+            isLoading={isLoading}
           />
         )}
         
-        {currentState === 'results' && formData && (
+        {currentState === 'results' && generationData && (
           <GenerationResults 
             formData={formData}
+            generationData={generationData}
             onStartOver={handleStartOver}
           />
         )}

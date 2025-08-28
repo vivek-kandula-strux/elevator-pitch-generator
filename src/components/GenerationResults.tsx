@@ -1,7 +1,6 @@
 import React from 'react';
 import { Download, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { generatePitchVariations, calculatePitchLength } from '@/utils/elevatorPitchGenerator';
 
 interface FormData {
   name: string;
@@ -12,17 +11,30 @@ interface FormData {
   specificAsk: string;
 }
 
+interface GenerationData extends FormData {
+  generatedPitch: string;
+  recordId: string;
+}
+
 interface GenerationResultsProps {
-  formData: FormData;
+  formData: FormData | null;
+  generationData: GenerationData;
   onStartOver: () => void;
 }
 
-export default function GenerationResults({ formData, onStartOver }: GenerationResultsProps) {
+export default function GenerationResults({ formData, generationData, onStartOver }: GenerationResultsProps) {
   const { toast } = useToast();
 
-  const pitchVariations = generatePitchVariations(formData);
-  const primaryPitch = pitchVariations[0];
+  const primaryPitch = generationData.generatedPitch;
   const pitchLength = calculatePitchLength(primaryPitch);
+
+  function calculatePitchLength(pitch: string): number {
+    // Average speaking pace is about 150 words per minute
+    // For a 30-second pitch, that's roughly 75 words
+    const words = pitch.split(' ').length;
+    const estimatedSeconds = Math.round((words / 150) * 60);
+    return estimatedSeconds;
+  }
 
   const handleDownload = () => {
     const content = generateTextContent();
@@ -30,7 +42,7 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${formData.company}_elevator_pitch.txt`;
+    a.download = `${generationData.company}_elevator_pitch.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -43,7 +55,7 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
   };
 
   const handleShare = () => {
-    const shareText = `Just generated a custom 30-second elevator pitch for ${formData.company}! 🚀\n\n"${primaryPitch}"`;
+    const shareText = `Just generated a custom 30-second elevator pitch for ${generationData.company}! 🚀\n\n"${primaryPitch}"`;
     
     if (navigator.share) {
       navigator.share({
@@ -61,19 +73,15 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
   };
 
   const generateTextContent = () => {
-    let content = `30-Second Elevator Pitch for ${formData.company}\n`;
+    let content = `30-Second Elevator Pitch for ${generationData.company}\n`;
     content += `Generated on: ${new Date().toLocaleDateString()}\n\n`;
     content += `Client Information:\n`;
-    content += `Name: ${formData.name}\n`;
-    content += `Company: ${formData.company}\n`;
-    content += `Category: ${formData.category}\n`;
-    content += `Contact: ${formData.whatsapp}\n\n`;
-    content += `PRIMARY PITCH (${pitchLength} seconds):\n`;
+    content += `Name: ${generationData.name}\n`;
+    content += `Company: ${generationData.company}\n`;
+    content += `Category: ${generationData.category}\n`;
+    content += `Contact: ${generationData.whatsapp}\n\n`;
+    content += `AI-GENERATED PITCH (${pitchLength} seconds):\n`;
     content += `${primaryPitch}\n\n`;
-    content += `ALTERNATIVE VERSIONS:\n`;
-    pitchVariations.slice(1).forEach((pitch, index) => {
-      content += `Version ${index + 2}: ${pitch}\n\n`;
-    });
     content += `USAGE TIPS:\n`;
     content += `• Practice your pitch until it flows naturally\n`;
     content += `• Adjust the pace to fit exactly 30 seconds\n`;
@@ -94,7 +102,7 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
           Your 30-Second Elevator Pitch is Ready! 🎉
         </h1>
         <p className="text-lg text-muted-foreground">
-          Here's your compelling elevator pitch for {formData.company}
+          Here's your AI-generated elevator pitch for {generationData.company}
         </p>
       </div>
 
@@ -159,26 +167,32 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
         </div>
       </div>
 
-      {/* Alternative Versions */}
-      {pitchVariations.length > 1 && (
-        <div className="form-card p-8">
-          <h3 className="text-xl font-semibold text-foreground mb-4">
-            Alternative Versions
-          </h3>
-          <div className="space-y-4">
-            {pitchVariations.slice(1).map((pitch, index) => (
-              <div key={index} className="border-l-4 border-secondary pl-4">
-                <p className="text-muted-foreground leading-relaxed">
-                  "{pitch}"
-                </p>
-                <span className="text-xs text-muted-foreground mt-2 block">
-                  Version {index + 2} • ~{calculatePitchLength(pitch)} seconds
-                </span>
-              </div>
-            ))}
+      {/* Usage Guidelines */}
+      <div className="form-card p-8">
+        <h3 className="text-xl font-semibold text-foreground mb-4">
+          How to Use Your Pitch
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-muted-foreground">
+          <div>
+            <h4 className="font-semibold text-foreground mb-2">Practice Tips:</h4>
+            <ul className="space-y-1 text-sm">
+              <li>• Read it aloud and time yourself</li>
+              <li>• Practice until it flows naturally</li>
+              <li>• Adjust pace to hit exactly 30 seconds</li>
+              <li>• Use confident body language</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-foreground mb-2">When to Use:</h4>
+            <ul className="space-y-1 text-sm">
+              <li>• Networking events</li>
+              <li>• Business meetings</li>
+              <li>• Investor presentations</li>
+              <li>• Social introductions</li>
+            </ul>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Contact Information */}
       <div className="form-card p-6 mt-8 bg-primary-light">
@@ -186,7 +200,7 @@ export default function GenerationResults({ formData, onStartOver }: GenerationR
           Practice Tips
         </h3>
         <p className="text-primary mb-4">
-          Your pitch is ready! Contact: <strong>{formData.whatsapp}</strong>
+          Your pitch is ready! Contact: <strong>{generationData.whatsapp}</strong>
         </p>
         <div className="text-sm text-primary/80 space-y-1">
           <p>• Practice until it flows naturally (aim for exactly 30 seconds)</p>
