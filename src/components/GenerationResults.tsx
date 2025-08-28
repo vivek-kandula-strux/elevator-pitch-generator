@@ -1,6 +1,7 @@
-import React from 'react';
-import { Copy, RefreshCw, Share2, CheckCircle, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Copy, RefreshCw, Share2, CheckCircle, Clock, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 interface FormData {
   name: string;
   whatsapp: string;
@@ -23,9 +24,8 @@ export default function GenerationResults({
   generationData,
   onStartOver
 }: GenerationResultsProps) {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const [isSyncing, setIsSyncing] = useState(false);
   const primaryPitch = generationData.generatedPitch;
   const pitchLength = calculatePitchLength(primaryPitch);
   function calculatePitchLength(pitch: string): number {
@@ -58,6 +58,31 @@ export default function GenerationResults({
       });
     }
   };
+
+  const handleSyncToSheets = async () => {
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-to-google-sheets');
+      
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Sync Successful!",
+        description: `${data.syncedCount} elevator pitches synced to Google Sheets.`,
+      });
+    } catch (error) {
+      console.error('Sync error:', error);
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: "Unable to sync to Google Sheets. Please try again.",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
   return <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Success Header */}
       <div className="form-card p-8 mb-8 text-center">
@@ -78,6 +103,14 @@ export default function GenerationResults({
           <button onClick={handleShare} className="btn-secondary flex items-center gap-2">
             <Share2 className="w-4 h-4" />
             Share
+          </button>
+          <button 
+            onClick={handleSyncToSheets} 
+            disabled={isSyncing}
+            className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Upload className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : 'Sync to Google Sheets'}
           </button>
           <button onClick={onStartOver} className="btn-secondary flex items-center gap-2">
             <RefreshCw className="w-4 h-4" />
