@@ -42,22 +42,25 @@ serve(async (req) => {
       throw new Error('Failed to store form data');
     }
 
-    // Generate elevator pitch using OpenAI
-    const prompt = `Create a compelling 30-second elevator pitch for the following business:
+    // Generate elevator pitch using OpenAI with proprietary BNI prompt
+    const prompt = `Act as a CEO of a Business. Create a 30 Second Elevator pitch which ends with a specific ask.
 
+Context -
+Name: ${formData.name}
 Company: ${formData.company}
-Industry: ${formData.category}
+Business Category: ${formData.category}
 Unique Selling Point: ${formData.usp}
-Target Audience & Goals: ${formData.specificAsk}
+Specific Ask: ${formData.specificAsk}
 
-Requirements:
-- Keep it exactly 30 seconds when spoken (approximately 75-80 words)
-- Start with a hook that grabs attention
-- Clearly state what the company does
-- Highlight the unique value proposition
-- End with a clear call to action
-- Make it conversational and natural
-- Focus on benefits to the target audience
+Intent: This 30 second goes into a BNI community where other business owners will try to connect us to the Specific Ask audiences in their contact spheres. The intent is not to pitch the room, but the contact sphere/ network of the room.
+
+Example 30-Second Elevator pitch: 
+'Good morning everyone! My name is Kartik Vijayvargi and I own Perfect Vaastu Consultancy. We specialize in Vaastu, a traditional Indian practice of architecture and design. Our unique selling point is that we provide practical solutions to our clients. We have successfully completed several projects in the past. I am here today to ask if you can connect us to any new projects in your contact sphere. Thank you for your time and I look forward to hearing from you.'
+
+Instructions:
+Tone: Confident + Proud
+Style: Informative + Specific + Approachable + Engaging
+Voice: Professional + Industry-specific
 
 Return only the elevator pitch text, no additional formatting or explanations.`;
 
