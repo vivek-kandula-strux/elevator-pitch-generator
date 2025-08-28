@@ -1,5 +1,5 @@
 import React from 'react';
-import { Copy, RefreshCw, Share2, Clock } from 'lucide-react';
+import { Copy, RefreshCw, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 interface FormData {
   name: string;
@@ -40,22 +40,6 @@ export default function GenerationResults({
       description: "Your elevator pitch has been copied to your clipboard."
     });
   };
-  const handleShare = () => {
-    const shareText = `Just generated a custom 30-second elevator pitch for ${generationData.company}! 🚀\n\n"${primaryPitch}"`;
-    if (navigator.share) {
-      navigator.share({
-        title: '30-Second Elevator Pitch Generator',
-        text: shareText,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(shareText);
-      toast({
-        title: "Copied to clipboard!",
-        description: "Your elevator pitch has been copied to your clipboard."
-      });
-    }
-  };
 
   return <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Success Header */}
@@ -73,10 +57,6 @@ export default function GenerationResults({
           <button onClick={handleCopy} className="btn-primary flex items-center gap-2">
             <Copy className="w-4 h-4" />
             Copy Pitch
-          </button>
-          <button onClick={handleShare} className="btn-secondary flex items-center gap-2">
-            <Share2 className="w-4 h-4" />
-            Share
           </button>
           <button onClick={onStartOver} className="btn-secondary flex items-center gap-2">
             <RefreshCw className="w-4 h-4" />
