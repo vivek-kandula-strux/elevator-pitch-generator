@@ -42,27 +42,6 @@ export default function GenerationResults({
   };
 
   return <div className="max-w-5xl mx-auto animate-fade-in">
-      {/* Success Header */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center animate-pulse-glow">
-            <span className="text-2xl">🎉</span>
-          </div>
-          <div className="text-sm font-medium text-success tracking-wide uppercase">
-            Generation Complete
-          </div>
-        </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
-          Your Elevator Pitch is{' '}
-          <span className="bg-gradient-primary bg-clip-text text-transparent">
-            Ready!
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Here's your professionally crafted 30-second elevator pitch, optimized for maximum impact
-        </p>
-      </div>
-
       {/* Main Pitch Display */}
       <div className="glass-card rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 mb-6 md:mb-10 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
@@ -98,7 +77,7 @@ export default function GenerationResults({
             <div className="absolute -left-2 top-0 w-1 h-full bg-gradient-primary rounded-full"></div>
             <div className="pl-6 h-full overflow-hidden">
               <div className="h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/20">
-                <blockquote className="text-sm sm:text-base leading-relaxed text-foreground font-medium relative">
+                <blockquote className="text-base sm:text-lg md:text-xl leading-relaxed text-foreground font-medium relative">
                   <span className="text-2xl text-primary/30 absolute -top-1 -left-4">"</span>
                   {primaryPitch}
                   <span className="text-2xl text-primary/30 absolute -bottom-3 right-0">"</span>
