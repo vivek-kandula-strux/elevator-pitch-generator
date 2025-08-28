@@ -181,6 +181,16 @@ export default {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.5' }
 				},
+				'blink-online': {
+					'0%, 100%': {
+						opacity: '1',
+						boxShadow: '0 0 8px hsl(var(--success) / 0.4)'
+					},
+					'50%': {
+						opacity: '0.2',
+						boxShadow: '0 0 4px hsl(var(--success) / 0.2)'
+					}
+				},
 				'progress': {
 					'0%': { transform: 'translateX(-100%)' },
 					'100%': { transform: 'translateX(0%)' }
@@ -195,6 +205,7 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				'shimmer': 'shimmer 2s linear infinite',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'blink-online': 'blink-online 1.5s ease-in-out infinite',
 				'progress': 'progress 30s linear'
 			}
 		}
