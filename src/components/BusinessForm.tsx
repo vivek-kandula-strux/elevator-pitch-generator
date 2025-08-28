@@ -85,7 +85,7 @@ export default function BusinessForm({
   return <div className="form-card p-4 md:p-6 lg:p-10 max-w-3xl mx-auto animate-fade-in">
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-3 mb-6">
-          <div className="w-4 h-4 rounded-full bg-success animate-blink-online"></div>
+          <div className="w-3 h-3 rounded-full bg-gradient-primary animate-pulse-glow"></div>
           <div className="text-sm font-medium text-primary-ultra tracking-wide uppercase">
             Strux Digital Presents
           </div>
@@ -95,7 +95,7 @@ export default function BusinessForm({
             30 Second Generator
           </span>
         </h1>
-        <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto font-medium">
+        <p className="text-balance max-w-2xl mx-auto font-medium text-red-50 text-xs">
           Transform your business story into a compelling 30-second pitch that opens doors and creates opportunities
         </p>
       </div>
