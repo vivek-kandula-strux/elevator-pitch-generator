@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      elevator_pitches: {
+        Row: {
+          category: string
+          company: string
+          created_at: string
+          generated_pitch: string | null
+          id: string
+          name: string
+          specific_ask: string
+          updated_at: string
+          usp: string
+          whatsapp: string
+        }
+        Insert: {
+          category: string
+          company: string
+          created_at?: string
+          generated_pitch?: string | null
+          id?: string
+          name: string
+          specific_ask: string
+          updated_at?: string
+          usp: string
+          whatsapp: string
+        }
+        Update: {
+          category?: string
+          company?: string
+          created_at?: string
+          generated_pitch?: string | null
+          id?: string
+          name?: string
+          specific_ask?: string
+          updated_at?: string
+          usp?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
