@@ -172,7 +172,7 @@ export default function BusinessForm({
 
         {/* Specific Ask Field */}
         <div className="space-y-3">
-          <label className="form-label">My Specific ask*</label>
+          <label className="form-label">My Specific ask *</label>
           <div className="relative">
             <textarea className={`form-input min-h-[120px] resize-none ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`} value={formData.specificAsk} onChange={e => handleInputChange('specificAsk', e.target.value)} disabled={isLoading} />
             <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
