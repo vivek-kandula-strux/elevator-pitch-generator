@@ -67,13 +67,6 @@ export default function GenerationResults({
       <div className="glass-card rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 mb-6 md:mb-10 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-border"></div>
         
-        <div className="flex justify-center mb-6 md:mb-8">
-          <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
-            <Copy className="w-5 h-5" />
-            <span className="font-semibold">Copy Pitch</span>
-          </button>
-        </div>
-
         <div className="bg-gradient-glass rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8 border border-card-border/30 relative">
           <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none"></div>
           
@@ -109,6 +102,13 @@ export default function GenerationResults({
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-center mb-6 md:mb-8">
+          <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
+            <Copy className="w-5 h-5" />
+            <span className="font-semibold">Copy Pitch</span>
+          </button>
         </div>
 
         {/* Generate New Pitch Button */}
