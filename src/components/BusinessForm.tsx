@@ -90,14 +90,6 @@ export default function BusinessForm({
             Strux Digital Presents
           </div>
         </div>
-        
-        {/* Modern Separator */}
-        <div className="relative flex items-center justify-center my-8">
-          <div className="relative w-32 h-px bg-gradient-border opacity-50">
-            <div className="absolute inset-0 bg-gradient-primary opacity-30 animate-shimmer"></div>
-          </div>
-        </div>
-        
         <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
           <span className="bg-gradient-primary bg-clip-text text-transparent">
             30 Second Generator
