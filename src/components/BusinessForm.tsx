@@ -15,21 +15,6 @@ interface BusinessFormProps {
   isLoading: boolean;
 }
 
-const businessCategories = [
-  'Technology',
-  'Healthcare',
-  'Retail',
-  'Finance',
-  'Education',
-  'Consulting',
-  'Manufacturing',
-  'Real Estate',
-  'Marketing',
-  'Food & Beverage',
-  'Professional Services',
-  'E-commerce',
-  'Other'
-];
 
 export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -174,19 +159,14 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
             <label className="form-label">
               Business Category *
             </label>
-            <select
+            <input
+              type="text"
               className={`form-input ${errors.category ? 'border-destructive focus:border-destructive' : ''}`}
+              placeholder="e.g. Technology, Healthcare, FinTech, etc."
               value={formData.category}
               onChange={(e) => handleInputChange('category', e.target.value)}
               disabled={isLoading}
-            >
-              <option value="">Select a category</option>
-              {businessCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            />
             {errors.category && (
               <p className="text-sm text-destructive mt-1">{errors.category}</p>
             )}
