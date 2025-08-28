@@ -88,145 +88,206 @@ export default function BusinessForm({ onSubmit, isLoading }: BusinessFormProps)
   };
 
   return (
-    <div className="form-card p-8 max-w-2xl mx-auto animate-fade-in">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-3">
-          30-Second Elevator Pitch Generator
+    <div className="form-card p-10 max-w-3xl mx-auto animate-fade-in">
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-3 mb-6">
+          <div className="w-3 h-3 rounded-full bg-gradient-primary animate-pulse-glow"></div>
+          <div className="text-sm font-medium text-primary-ultra tracking-wide uppercase">
+            AI-Powered Generation
+          </div>
+        </div>
+        <h1 className="text-5xl font-bold text-foreground mb-4 tracking-tight">
+          30-Second Elevator Pitch{' '}
+          <span className="bg-gradient-primary bg-clip-text text-transparent">
+            Generator
+          </span>
         </h1>
-        <p className="text-lg text-muted-foreground text-balance">
-          Share your business details and get a compelling 30-second elevator pitch instantly
+        <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto font-medium">
+          Transform your business story into a compelling 30-second pitch that opens doors and creates opportunities
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Name Field */}
-          <div>
+          <div className="space-y-3">
             <label className="form-label">
               Full Name *
             </label>
             <input
               type="text"
               className={`form-input ${errors.name ? 'border-destructive focus:border-destructive' : ''}`}
+              placeholder="Enter your full name"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               disabled={isLoading}
             />
             {errors.name && (
-              <p className="text-sm text-destructive mt-1">{errors.name}</p>
+              <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+                {errors.name}
+              </p>
             )}
           </div>
 
           {/* WhatsApp Field */}
-          <div>
+          <div className="space-y-3">
             <label className="form-label">
               WhatsApp Number *
             </label>
             <input
               type="tel"
               className={`form-input ${errors.whatsapp ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="WhatsApp Number"
+              placeholder="+1 (555) 123-4567"
               value={formData.whatsapp}
               onChange={(e) => handleInputChange('whatsapp', e.target.value)}
               disabled={isLoading}
             />
             {errors.whatsapp && (
-              <p className="text-sm text-destructive mt-1">{errors.whatsapp}</p>
+              <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+                {errors.whatsapp}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Company Field */}
-          <div>
+          <div className="space-y-3">
             <label className="form-label">
               Company Name *
             </label>
             <input
               type="text"
               className={`form-input ${errors.company ? 'border-destructive focus:border-destructive' : ''}`}
+              placeholder="Your company or startup name"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
               disabled={isLoading}
             />
             {errors.company && (
-              <p className="text-sm text-destructive mt-1">{errors.company}</p>
+              <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+                {errors.company}
+              </p>
             )}
           </div>
 
           {/* Category Field */}
-          <div>
+          <div className="space-y-3">
             <label className="form-label">
               Business Category *
             </label>
             <input
               type="text"
               className={`form-input ${errors.category ? 'border-destructive focus:border-destructive' : ''}`}
-              placeholder="e.g. Technology, Healthcare, FinTech, etc."
+              placeholder="e.g. SaaS, E-commerce, FinTech, Healthcare"
               value={formData.category}
               onChange={(e) => handleInputChange('category', e.target.value)}
               disabled={isLoading}
             />
             {errors.category && (
-              <p className="text-sm text-destructive mt-1">{errors.category}</p>
+              <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+                {errors.category}
+              </p>
             )}
           </div>
         </div>
 
         {/* USP Field */}
-        <div>
+        <div className="space-y-3">
           <label className="form-label">
             Unique Selling Point *
           </label>
-          <textarea
-            className={`form-input min-h-[100px] resize-y ${errors.usp ? 'border-destructive focus:border-destructive' : ''}`}
-            value={formData.usp}
-            onChange={(e) => handleInputChange('usp', e.target.value)}
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <textarea
+              className={`form-input min-h-[120px] resize-none ${errors.usp ? 'border-destructive focus:border-destructive' : ''}`}
+              placeholder="What makes your business unique? What problem do you solve better than anyone else?"
+              value={formData.usp}
+              onChange={(e) => handleInputChange('usp', e.target.value)}
+              disabled={isLoading}
+            />
+            <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
+              {formData.usp.length}/200
+            </div>
+          </div>
           {errors.usp && (
-            <p className="text-sm text-destructive mt-1">{errors.usp}</p>
+            <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+              {errors.usp}
+            </p>
           )}
         </div>
 
         {/* Specific Ask Field */}
-        <div>
+        <div className="space-y-3">
           <label className="form-label">
-            Specific Ask *
+            Target Audience & Goals *
           </label>
-          <textarea
-            className={`form-input min-h-[100px] resize-y ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}
-            value={formData.specificAsk}
-            onChange={(e) => handleInputChange('specificAsk', e.target.value)}
-            disabled={isLoading}
-          />
+          <div className="relative">
+            <textarea
+              className={`form-input min-h-[120px] resize-none ${errors.specificAsk ? 'border-destructive focus:border-destructive' : ''}`}
+              placeholder="Who is your ideal customer? What do you want to achieve with this pitch? (e.g., find investors, attract customers, recruit talent)"
+              value={formData.specificAsk}
+              onChange={(e) => handleInputChange('specificAsk', e.target.value)}
+              disabled={isLoading}
+            />
+            <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
+              {formData.specificAsk.length}/300
+            </div>
+          </div>
           {errors.specificAsk && (
-            <p className="text-sm text-destructive mt-1">{errors.specificAsk}</p>
+            <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+              <span className="w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center text-xs">!</span>
+              {errors.specificAsk}
+            </p>
           )}
         </div>
 
         {/* Submit Button */}
-        <div className="pt-4">
+        <div className="pt-6">
           <button
             type="submit"
             disabled={isLoading}
-            className="btn-primary w-full text-lg"
+            className="btn-primary w-full text-lg relative group"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-3">
                 <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-                Generating...
+                <span className="font-semibold">Generating Your Pitch...</span>
               </span>
             ) : (
-              'Generate My 30-Second Pitch'
+              <span className="flex items-center justify-center gap-3">
+                <span className="font-semibold">Generate My 30-Second Pitch</span>
+                <div className="w-5 h-5 rounded-full bg-primary-foreground/20 flex items-center justify-center transition-transform group-hover:scale-110">
+                  ✨
+                </div>
+              </span>
             )}
           </button>
         </div>
       </form>
 
-      <div className="text-center mt-6 text-sm text-muted-foreground space-y-2">
-        <p>✓ Secure processing • ✓ No spam • ✓ Professional results</p>
-        <p>Powered by <span className="text-primary font-medium">Strux Digital</span></p>
+      <div className="text-center mt-8 space-y-4">
+        <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-success"></div>
+            <span>Secure processing</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-success"></div>
+            <span>No spam</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-success"></div>
+            <span>Professional results</span>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Powered by <span className="text-primary font-semibold bg-gradient-primary bg-clip-text text-transparent">Strux Digital</span>
+        </p>
       </div>
     </div>
   );
