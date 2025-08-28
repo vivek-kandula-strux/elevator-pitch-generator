@@ -2,39 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* 30-Second Generator Design System - Professional Business App */
 
 @layer base {
   :root {
+    /* Core neutral palette */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --foreground: 215 25% 27%;
+    
+    /* Professional blue accent */
+    --primary: 212 100% 48%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 212 100% 42%;
+    --primary-light: 212 100% 96%;
+    
+    /* Subtle grays */
+    --secondary: 210 11% 96%;
+    --secondary-foreground: 215 25% 27%;
+    
+    --muted: 210 11% 96%;
+    --muted-foreground: 215 13% 65%;
+    
+    /* Form elements */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 25% 27%;
+    --border: 214 13% 90%;
+    --input: 0 0% 100%;
+    --input-border: 214 13% 90%;
+    --input-border-focus: 212 100% 48%;
+    --ring: 212 100% 48%;
+    
+    /* Status colors */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --popover-foreground: 215 25% 27%;
+    
+    /* Accent */
+    --accent: 210 11% 96%;
+    --accent-foreground: 215 25% 27%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(212 100% 48%), hsl(212 100% 42%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 11% 98%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 11% 99%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(215 25% 27% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(215 25% 27% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(215 25% 27% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(215 25% 27% / 0.1);
+    --shadow-primary: 0 4px 14px 0 hsl(212 100% 48% / 0.25);
+    
+    /* Border radius */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
 
     --radius: 0.5rem;
 
@@ -100,6 +129,91 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Form Components */
+  .form-card {
+    @apply bg-gradient-to-br from-white to-secondary/30 border border-border shadow-lg rounded-lg;
+  }
+  
+  .form-input {
+    @apply w-full px-4 py-3 border border-input-border rounded-lg bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-input-border-focus transition-all duration-200;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-foreground mb-2;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary-hover text-primary-foreground px-8 py-3 rounded-lg font-medium shadow-primary hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-2.5 rounded-lg font-medium border border-border hover:bg-secondary/80 transition-colors duration-200;
+  }
+  
+  /* Progress Components */
+  .progress-ring {
+    @apply w-20 h-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin;
+  }
+  
+  .countdown-display {
+    @apply text-6xl font-bold text-primary tabular-nums;
+  }
+  
+  /* Animation Classes */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  .scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

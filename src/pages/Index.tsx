@@ -1,11 +1,59 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import BusinessForm from '@/components/BusinessForm';
+import GenerationProgress from '@/components/GenerationProgress';
+import GenerationResults from '@/components/GenerationResults';
+
+interface FormData {
+  name: string;
+  whatsapp: string;
+  company: string;
+  category: string;
+  usp: string;
+  specificAsk: string;
+}
+
+type AppState = 'form' | 'generating' | 'results';
 
 const Index = () => {
+  const [currentState, setCurrentState] = useState<AppState>('form');
+  const [formData, setFormData] = useState<FormData | null>(null);
+
+  const handleFormSubmit = (data: FormData) => {
+    setFormData(data);
+    setCurrentState('generating');
+  };
+
+  const handleGenerationComplete = () => {
+    setCurrentState('results');
+  };
+
+  const handleStartOver = () => {
+    setCurrentState('form');
+    setFormData(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-subtle py-8 px-4">
+      <div className="container mx-auto">
+        {currentState === 'form' && (
+          <BusinessForm 
+            onSubmit={handleFormSubmit}
+            isLoading={false}
+          />
+        )}
+        
+        {currentState === 'generating' && (
+          <GenerationProgress 
+            onComplete={handleGenerationComplete}
+          />
+        )}
+        
+        {currentState === 'results' && formData && (
+          <GenerationResults 
+            formData={formData}
+            onStartOver={handleStartOver}
+          />
+        )}
       </div>
     </div>
   );
