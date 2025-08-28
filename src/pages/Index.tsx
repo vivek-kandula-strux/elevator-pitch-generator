@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BusinessForm from '@/components/BusinessForm';
 import GenerationResults from '@/components/GenerationResults';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,13 @@ const Index = () => {
   const [generationData, setGenerationData] = useState<GenerationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Automatically scroll to top when transitioning to results page
+  useEffect(() => {
+    if (currentState === 'results') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentState]);
 
   const handleFormSubmit = async (data: FormData) => {
     setIsLoading(true);
