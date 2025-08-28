@@ -95,7 +95,7 @@ export default function BusinessForm({
             30 Second Generator
           </span>
         </h1>
-        <p className="text-balance max-w-2xl mx-auto font-medium text-red-50 text-xs">
+        <p className="text-balance max-w-2xl mx-auto font-medium text-red-50 text-sm">
           Transform your business story into a compelling 30-second pitch that opens doors and creates opportunities
         </p>
       </div>
