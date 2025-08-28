@@ -56,10 +56,6 @@ export default function BusinessForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      toast({
-        title: "Form Submitted!",
-        description: "Generating your elevator pitch..."
-      });
       onSubmit(formData);
     } else {
       toast({

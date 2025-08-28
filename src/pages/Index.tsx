@@ -46,11 +46,6 @@ const Index = () => {
         recordId: result.recordId
       });
       setCurrentState('results');
-      
-      toast({
-        title: "Success!",
-        description: "Your elevator pitch has been generated and saved.",
-      });
     } catch (error) {
       console.error('Error generating pitch:', error);
       toast({
