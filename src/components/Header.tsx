@@ -15,9 +15,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <span className="text-sm font-bold text-background">SD</span>
-            </div>
+            <img 
+              src="/lovable-uploads/8530f685-76d2-4feb-9bb2-4c8d8e5e4180.png" 
+              alt="Strux Digital Logo" 
+              className="h-8 w-auto"
+            />
             <span className="text-xl font-bold text-foreground tracking-tight">
               30 Second Generator
             </span>
