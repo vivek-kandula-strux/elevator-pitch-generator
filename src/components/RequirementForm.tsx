@@ -22,6 +22,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
   const [formData, setFormData] = useState<RequirementFormData>({
     name: '',
     email: '',
+    company: '',
     whatsapp: '',
     serviceType: preSelectedService || '',
     message: ''
@@ -38,11 +39,13 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    if (formData.whatsapp && !/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
+    if (!formData.company.trim()) newErrors.company = 'Company is required';
+    if (!formData.whatsapp.trim()) newErrors.whatsapp = 'WhatsApp is required';
+    else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
       newErrors.whatsapp = 'Please enter a valid WhatsApp number';
     }
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
-    if (!formData.message.trim()) newErrors.message = 'Message is required';
+    if (!formData.message.trim()) newErrors.message = 'Requirements are required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -61,8 +64,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
         .from('elevator_pitches')
         .insert({
           name: formData.name,
-          whatsapp: formData.whatsapp || '',
-          company: 'N/A', // Default value for required field
+          whatsapp: formData.whatsapp,
+          company: formData.company,
           category: formData.serviceType,
           usp: formData.message,
           specific_ask: 'Requirement form submission'
@@ -85,6 +88,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
         setFormData({ 
           name: '', 
           email: '', 
+          company: '',
           whatsapp: '',
           serviceType: preSelectedService || '', 
           message: '' 
@@ -109,6 +113,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
       setFormData({ 
         name: '', 
         email: '', 
+        company: '',
         whatsapp: '',
         serviceType: preSelectedService || '', 
         message: '' 
@@ -134,7 +139,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl"
+            className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -146,21 +151,21 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
               <X className="w-4 h-4" />
             </button>
 
-            <div className="p-8">
+            <div className="p-4 sm:p-6">
               {!isSubmitted ? (
                 <>
                   {/* Header */}
-                  <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-foreground mb-2">
-                      Share Your Requirements
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold text-foreground mb-1">
+                      Get Started
                     </h2>
-                    <p className="text-muted-foreground">
-                      Tell us about your project and we'll get back to you with a custom proposal.
+                    <p className="text-sm text-muted-foreground">
+                      Tell us about your project needs
                     </p>
                   </div>
 
                   {/* Form */}
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-4">
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
@@ -173,7 +178,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                         className={errors.name ? 'border-destructive' : ''}
-                        placeholder="Your full name"
+                        placeholder="Your name"
                       />
                       {errors.name && (
                         <p className="text-sm text-destructive mt-1">{errors.name}</p>
@@ -183,7 +188,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
+                      transition={{ delay: 0.15 }}
                     >
                       <Label htmlFor="email">Email *</Label>
                       <Input
@@ -192,7 +197,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                         value={formData.email}
                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                         className={errors.email ? 'border-destructive' : ''}
-                        placeholder="your.email@example.com"
+                        placeholder="your@email.com"
                       />
                       {errors.email && (
                         <p className="text-sm text-destructive mt-1">{errors.email}</p>
@@ -202,21 +207,35 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Label htmlFor="company">Company *</Label>
+                      <Input
+                        id="company"
+                        type="text"
+                        value={formData.company}
+                        onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                        className={errors.company ? 'border-destructive' : ''}
+                        placeholder="Your company"
+                      />
+                      {errors.company && (
+                        <p className="text-sm text-destructive mt-1">{errors.company}</p>
+                      )}
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.25 }}
                     >
-                      <Label htmlFor="whatsapp">
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          WhatsApp Number
-                        </div>
-                      </Label>
+                      <Label htmlFor="whatsapp">WhatsApp *</Label>
                       <Input
                         id="whatsapp"
                         type="tel"
                         value={formData.whatsapp}
                         onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
                         className={errors.whatsapp ? 'border-destructive' : ''}
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+1 555 123 4567"
                       />
                       {errors.whatsapp && (
                         <p className="text-sm text-destructive mt-1">{errors.whatsapp}</p>
@@ -228,13 +247,13 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.3 }}
                     >
-                      <Label htmlFor="serviceType">Service Type *</Label>
+                      <Label htmlFor="serviceType">Service *</Label>
                       <Select
                         value={formData.serviceType}
                         onValueChange={(value) => setFormData(prev => ({ ...prev, serviceType: value }))}
                       >
                         <SelectTrigger className={errors.serviceType ? 'border-destructive' : ''}>
-                          <SelectValue placeholder="Select a service" />
+                          <SelectValue placeholder="Select service" />
                         </SelectTrigger>
                         <SelectContent>
                           {serviceCategories.map((category) => (
@@ -252,16 +271,16 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 }}
+                      transition={{ delay: 0.35 }}
                     >
-                      <Label htmlFor="message">Project Details *</Label>
+                      <Label htmlFor="message">Requirements *</Label>
                       <Textarea
                         id="message"
                         value={formData.message}
                         onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                         className={errors.message ? 'border-destructive' : ''}
-                        placeholder="Tell us about your project, goals, and any specific requirements..."
-                        rows={4}
+                        placeholder="Describe your project needs..."
+                        rows={3}
                       />
                       {errors.message && (
                         <p className="text-sm text-destructive mt-1">{errors.message}</p>
@@ -271,7 +290,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.4 }}
                     >
                       <Button
                         type="submit"
@@ -284,7 +303,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                             Submitting...
                           </div>
                         ) : (
-                          'Submit Requirement'
+                          'Get Quote'
                         )}
                       </Button>
                     </motion.div>
@@ -294,14 +313,14 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-8"
+                  className="text-center py-6"
                 >
-                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                  <h3 className="text-xl font-bold text-foreground mb-2">
                     Thank You!
                   </h3>
-                  <p className="text-muted-foreground">
-                    Your requirement has been submitted successfully. We'll get back to you within 24 hours.
+                  <p className="text-sm text-muted-foreground">
+                    We'll contact you within 24 hours.
                   </p>
                 </motion.div>
               )}
