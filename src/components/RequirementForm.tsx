@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { X, CheckCircle } from 'lucide-react';
+import { X, CheckCircle, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -8,6 +8,8 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RequirementFormData } from '../types/services';
 import { serviceCategories } from '../data/serviceCategories';
+import { supabase } from '../integrations/supabase/client';
+import { useToast } from '../hooks/use-toast';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -16,9 +18,11 @@ interface RequirementFormProps {
 }
 
 export const RequirementForm = ({ isOpen, onClose, preSelectedService }: RequirementFormProps) => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<RequirementFormData>({
     name: '',
     email: '',
+    whatsapp: '',
     serviceType: preSelectedService || '',
     message: ''
   });
@@ -34,6 +38,9 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
+    if (formData.whatsapp && !/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
+      newErrors.whatsapp = 'Please enter a valid WhatsApp number';
+    }
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
     if (!formData.message.trim()) newErrors.message = 'Message is required';
 
@@ -48,23 +55,64 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', serviceType: preSelectedService || '', message: '' });
-      onClose();
-    }, 3000);
+    try {
+      // Store data in Supabase
+      const { data, error } = await supabase
+        .from('elevator_pitches')
+        .insert({
+          name: formData.name,
+          whatsapp: formData.whatsapp || '',
+          company: 'N/A', // Default value for required field
+          category: formData.serviceType,
+          usp: formData.message,
+          specific_ask: 'Requirement form submission'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Requirement submitted successfully!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      setIsSubmitted(true);
+      
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ 
+          name: '', 
+          email: '', 
+          whatsapp: '',
+          serviceType: preSelectedService || '', 
+          message: '' 
+        });
+        onClose();
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error submitting requirement:', error);
+      toast({
+        title: "Error submitting requirement",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setFormData({ name: '', email: '', serviceType: preSelectedService || '', message: '' });
+      setFormData({ 
+        name: '', 
+        email: '', 
+        whatsapp: '',
+        serviceType: preSelectedService || '', 
+        message: '' 
+      });
       setErrors({});
       setIsSubmitted(false);
       onClose();
@@ -148,6 +196,30 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       />
                       {errors.email && (
                         <p className="text-sm text-destructive mt-1">{errors.email}</p>
+                      )}
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 }}
+                    >
+                      <Label htmlFor="whatsapp">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4" />
+                          WhatsApp Number
+                        </div>
+                      </Label>
+                      <Input
+                        id="whatsapp"
+                        type="tel"
+                        value={formData.whatsapp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
+                        className={errors.whatsapp ? 'border-destructive' : ''}
+                        placeholder="+1 (555) 123-4567"
+                      />
+                      {errors.whatsapp && (
+                        <p className="text-sm text-destructive mt-1">{errors.whatsapp}</p>
                       )}
                     </motion.div>
 

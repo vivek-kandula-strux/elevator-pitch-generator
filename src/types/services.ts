@@ -33,6 +33,7 @@ export interface Service extends ServiceCategory {} // For backwards compatibili
 export interface RequirementFormData {
   name: string;
   email: string;
+  whatsapp: string;
   serviceType: string;
   message: string;
 }
