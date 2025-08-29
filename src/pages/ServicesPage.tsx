@@ -8,7 +8,7 @@ import { ServiceCategory } from '../types/services';
 // Import optimized section components
 import { EnhancedHeroSection } from '../components/sections/EnhancedHeroSection';
 import { ClientLogoSlider } from '../components/sections/ClientLogoSlider';
-import { EnhancedServicesSection } from '../components/sections/EnhancedServicesSection';
+import { ModernServicesSection } from '../components/sections/ModernServicesSection';
 import { FinalCTASection } from '../components/sections/FinalCTASection';
 
 const ServicesPage = () => {
@@ -60,12 +60,9 @@ const ServicesPage = () => {
         {/* Client Logo Slider - Modern trust indicators */}
         <ClientLogoSlider />
         
-        {/* Enhanced Services Section - Core service offerings */}
-        <EnhancedServicesSection
-          filteredCategories={filteredCategories}
-          onCategorySelect={handleCategorySelect}
-          searchTerm={searchTerm}
-          totalCategories={serviceCategories.length}
+        {/* Modern Services Section - Clean hierarchy with progressive disclosure */}
+        <ModernServicesSection
+          onGetStartedClick={() => setIsFormOpen(true)}
         />
         
         {/* Final CTA Section - Single conversion point */}
