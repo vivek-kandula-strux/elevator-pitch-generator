@@ -7,7 +7,7 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { RequirementFormData } from '../types/services';
-import { services } from '../data/services';
+import { serviceCategories } from '../data/serviceCategories';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -165,9 +165,9 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                           <SelectValue placeholder="Select a service" />
                         </SelectTrigger>
                         <SelectContent>
-                          {services.map((service) => (
-                            <SelectItem key={service.id} value={service.id}>
-                              {service.icon} {service.title}
+                          {serviceCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.icon} {category.title}
                             </SelectItem>
                           ))}
                         </SelectContent>

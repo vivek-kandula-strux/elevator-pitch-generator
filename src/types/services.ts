@@ -11,14 +11,24 @@ export interface CaseStudy {
   imageUrl?: string;
 }
 
-export interface Service {
+export interface SubService {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+export interface ServiceCategory {
   id: string;
   title: string;
   description: string;
   icon: string;
   shortDesc: string;
+  services: SubService[];
   caseStudy: CaseStudy;
+  color: string;
 }
+
+export interface Service extends ServiceCategory {} // For backwards compatibility
 
 export interface RequirementFormData {
   name: string;

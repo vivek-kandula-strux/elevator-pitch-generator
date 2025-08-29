@@ -1,28 +1,30 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ServiceCard } from '../components/ServiceCard';
-import { ServiceModal } from '../components/ServiceModal';
+import { ServiceCategoryCard } from '../components/ServiceCategoryCard';
+import { ServiceCategoryModal } from '../components/ServiceCategoryModal';
 import { RequirementForm } from '../components/RequirementForm';
 import Header from '../components/Header';
-import { services } from '../data/services';
-import { Service } from '../types/services';
+import { serviceCategories } from '../data/serviceCategories';
+import { ServiceCategory } from '../types/services';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 const ServicesPage = () => {
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleServiceSelect = (service: Service) => {
-    setSelectedService(service);
+  const handleCategorySelect = (category: ServiceCategory) => {
+    setSelectedCategory(category);
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setTimeout(() => setSelectedService(null), 300);
+    setTimeout(() => setSelectedCategory(null), 300);
   };
 
   const handleRequirementClick = () => {
@@ -33,6 +35,14 @@ const ServicesPage = () => {
   const handleFormClose = () => {
     setIsFormOpen(false);
   };
+
+  const filteredCategories = serviceCategories.filter(category =>
+    category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.services.some(service => 
+      service.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,36 +58,85 @@ const ServicesPage = () => {
             className="mb-12"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              Digital Marketing
+              Full-Service Digital Marketing
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
-                That Delivers Results
+                Agency Solutions
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Explore our comprehensive suite of digital marketing services, each backed by proven case studies and measurable results. Click on any service to see how we've helped businesses like yours achieve their goals.
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
+              From paid media and creative production to podcast studios and fractional leadership - we offer 14 specialized service categories with 60+ individual solutions. Each service is backed by proven case studies and measurable results.
             </p>
+            
+            {/* Search Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="max-w-md mx-auto relative"
+            >
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search services..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-background/50 border-border/50"
+              />
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Service Categories Grid */}
       <section className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {searchTerm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-6"
+            >
+              <p className="text-muted-foreground">
+                Showing {filteredCategories.length} of {serviceCategories.length} service categories
+                {searchTerm && ` for "${searchTerm}"`}
+              </p>
+            </motion.div>
+          )}
+          
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
-            {services.map((service, index) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onSelect={handleServiceSelect}
+            {filteredCategories.map((category, index) => (
+              <ServiceCategoryCard
+                key={category.id}
+                category={category}
+                onSelect={handleCategorySelect}
                 index={index}
               />
             ))}
           </motion.div>
+          
+          {filteredCategories.length === 0 && searchTerm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-12"
+            >
+              <p className="text-muted-foreground text-lg">
+                No services found matching "{searchTerm}"
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setSearchTerm('')}
+                className="mt-4"
+              >
+                Clear Search
+              </Button>
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -108,8 +167,8 @@ const ServicesPage = () => {
       </section>
 
       {/* Modals */}
-      <ServiceModal
-        service={selectedService}
+      <ServiceCategoryModal
+        category={selectedCategory}
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onRequirementClick={handleRequirementClick}
@@ -118,7 +177,7 @@ const ServicesPage = () => {
       <RequirementForm
         isOpen={isFormOpen}
         onClose={handleFormClose}
-        preSelectedService={selectedService?.id}
+        preSelectedService={selectedCategory?.id}
       />
     </div>
   );
