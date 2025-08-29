@@ -67,7 +67,7 @@ export default function GenerationResults({
   };
 
   const createShareContent = () => {
-    return `${primaryPitch}\n\n---\nMade by Strux Digital - 30 Second Generator (https://strux.work/30secs)`;
+    return `${primaryPitch}\n\n---\nMade by Strux Digital - 30 Second Generator (https://strux.work/30sec)`;
   };
 
   const handleShare = (platform: string) => {
@@ -202,7 +202,7 @@ export default function GenerationResults({
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Made by <span className="font-medium text-foreground">Strux Digital</span> - 30 Second Generator (<a href="https://strux.work/30secs" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://strux.work/30secs</a>)
+              Made by <span className="font-medium text-foreground">Strux Digital</span> - 30 Second Generator (<a href="https://strux.work/30sec" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://strux.work/30sec</a>)
             </p>
           </div>
         </div>
