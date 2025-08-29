@@ -24,6 +24,10 @@ const ResultsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  // Get access token from URL params
+  const urlParams = new URLSearchParams(location.search);
+  const accessToken = urlParams.get('token');
+  
   const [formData, setFormData] = useState<FormData | null>(null);
   const [generationData, setGenerationData] = useState<GenerationData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,10 +52,15 @@ const ResultsPage = () => {
   const fetchDataFromDatabase = async (id: string) => {
     setIsLoading(true);
     try {
+      if (!accessToken) {
+        throw new Error('Access token required');
+      }
+
       const { data, error } = await supabase
         .from('elevator_pitches')
         .select('*')
         .eq('id', id)
+        .eq('access_token', accessToken)
         .single();
 
       if (error) {

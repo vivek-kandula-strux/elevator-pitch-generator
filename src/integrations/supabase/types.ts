@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       elevator_pitches: {
         Row: {
+          access_token: string
           category: string
           company: string
           created_at: string
@@ -28,6 +29,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          access_token?: string
           category: string
           company: string
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           whatsapp: string
         }
         Update: {
+          access_token?: string
           category?: string
           company?: string
           created_at?: string

@@ -30,8 +30,8 @@ const FormPage = () => {
         throw error;
       }
 
-      // Navigate to results page with the record ID and pass generation data
-      navigate(`/results/${result.recordId}`, {
+      // Navigate to results page with the record ID and access token
+      navigate(`/results/${result.recordId}?token=${result.accessToken}`, {
         state: {
           formData: data,
           generationData: {

@@ -125,7 +125,8 @@ Return only the elevator pitch text, no additional formatting or explanations.`;
 
     return new Response(JSON.stringify({ 
       generatedPitch,
-      recordId: insertedData.id 
+      recordId: insertedData.id,
+      accessToken: insertedData.access_token
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
