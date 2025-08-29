@@ -7,7 +7,7 @@ interface FinalCTASectionProps {
 export const FinalCTASection = ({
   onGetStartedClick
 }: FinalCTASectionProps) => {
-  return <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15 border-t border-primary/20">
+  return <section className="py-24 px-6 sm:px-8 lg:px-12 xl:px-16 relative overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15 border-t border-primary/20">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/80 to-secondary/20" />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-96 bg-gradient-to-r from-primary/15 to-secondary/15 rounded-full blur-3xl" />
@@ -49,7 +49,7 @@ export const FinalCTASection = ({
           </motion.div>
           
           {/* Main Headline */}
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-tight">
             Let's Turn Your Vision
             <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Into Digital Reality
@@ -57,7 +57,7 @@ export const FinalCTASection = ({
           </h2>
           
           {/* Description */}
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
+          <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed mb-12">
             Join 150+ successful businesses who've transformed their digital presence with our 
             comprehensive strategies. Your growth story starts with a single conversation.
           </p>
@@ -74,7 +74,7 @@ export const FinalCTASection = ({
           delay: 0.4
         }} viewport={{
           once: true
-        }} className="flex flex-wrap justify-center items-center gap-8 mb-12 text-muted-foreground">
+        }} className="flex flex-wrap justify-center items-center gap-8 mb-12 text-foreground/75">
             <div className="flex items-center gap-2">
               
               
@@ -102,16 +102,16 @@ export const FinalCTASection = ({
         }} viewport={{
           once: true
         }} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button onClick={onGetStartedClick} size="lg" className="group text-xl font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-3xl shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 py-0 px-[58px]">
+            <Button onClick={onGetStartedClick} size="lg" className="group text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-3xl shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 py-0 px-8 sm:px-[58px]">
               Start Your Transformation
               <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
             </Button>
             
             <div className="text-center">
-              <Button variant="outline" size="lg" className="px-8 py-5 text-lg font-semibold rounded-3xl border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
+              <Button variant="outline" size="lg" className="px-6 sm:px-8 py-5 text-base sm:text-lg font-semibold rounded-3xl border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
                 View Our Portfolio
               </Button>
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-xs sm:text-sm text-foreground/70 mt-2">
                 See real results from real clients
               </p>
             </div>

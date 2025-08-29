@@ -10,7 +10,7 @@ interface ModernServicesSectionProps {
 
 export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSectionProps) => {
   return (
-    <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-background">
+    <section className="py-16 lg:py-24 px-6 sm:px-8 lg:px-12 xl:px-16 relative overflow-hidden bg-background">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
       <div className="absolute inset-0 bg-gradient-glow opacity-15" />
@@ -40,7 +40,7 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
                 </span>
               </h2>
 
-              <p className="text-lg lg:text-xl text-muted-foreground mb-6 lg:mb-8 leading-relaxed">
+              <p className="text-lg lg:text-xl text-foreground/80 mb-6 lg:mb-8 leading-relaxed">
                 From growth and advertising to automation and analytics—we provide end-to-end 
                 marketing services that scale your business and deliver measurable results.
               </p>
@@ -62,7 +62,7 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
                     className="flex items-center gap-3"
                   >
                     <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                    <span className="text-sm lg:text-base text-muted-foreground">{benefit}</span>
+                    <span className="text-sm lg:text-base text-foreground/75">{benefit}</span>
                   </motion.div>
                 ))}
               </div>
@@ -71,19 +71,19 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
               <div className="grid grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 rounded-2xl bg-gradient-card border border-border/50 mb-6 lg:mb-8">
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold text-primary mb-1">500+</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground">Projects Delivered</div>
+                  <div className="text-xs lg:text-sm text-foreground/70">Projects Delivered</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold text-secondary mb-1">95%</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground">Client Retention</div>
+                  <div className="text-xs lg:text-sm text-foreground/70">Client Retention</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold text-success mb-1">4.8★</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground">Average Rating</div>
+                  <div className="text-xs lg:text-sm text-foreground/70">Average Rating</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl lg:text-2xl font-bold text-warning mb-1">24/7</div>
-                  <div className="text-xs lg:text-sm text-muted-foreground">Support Available</div>
+                  <div className="text-xs lg:text-sm text-foreground/70">Support Available</div>
                 </div>
               </div>
 
@@ -111,7 +111,7 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
               <h3 className="text-xl lg:text-2xl font-semibold text-foreground mb-3 lg:mb-4">
                 Choose Your Growth Path
               </h3>
-              <p className="text-sm lg:text-base text-muted-foreground">
+              <p className="text-sm lg:text-base text-foreground/75">
                 Explore our specialized service categories and find the perfect solution for your business needs.
               </p>
             </motion.div>
@@ -145,7 +145,7 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
               <h4 className="text-base lg:text-lg font-semibold text-foreground mb-2">
                 Need a Custom Solution?
               </h4>
-              <p className="text-sm lg:text-base text-muted-foreground mb-4">
+              <p className="text-sm lg:text-base text-foreground/75 mb-4">
                 We create tailored marketing strategies that fit your unique business requirements.
               </p>
               <Button

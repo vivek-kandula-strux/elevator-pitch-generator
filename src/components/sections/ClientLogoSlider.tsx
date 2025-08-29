@@ -95,7 +95,7 @@ export const ClientLogoSlider = () => {
       <div className="absolute inset-0 bg-gradient-to-r from-muted/10 via-background/50 to-muted/10 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-glow opacity-10 pointer-events-none" />
       
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -106,7 +106,7 @@ export const ClientLogoSlider = () => {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 lg:mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Trusted by Industry Leaders
           </h2>
-          <p className="text-sm lg:text-base text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm lg:text-base text-foreground/75 max-w-2xl mx-auto">
             Join thousands of successful businesses that have transformed their digital presence with our solutions.
           </p>
         </motion.div>
@@ -182,27 +182,6 @@ export const ClientLogoSlider = () => {
           </div>
         </div>
 
-        {/* Trust indicators */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-wrap justify-center items-center gap-8 mt-12 text-sm text-muted-foreground"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-success rounded-full animate-blink-online"></div>
-            <span>500+ Active Clients</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-primary rounded-full animate-pulse-glow"></div>
-            <span>99.9% Uptime Guarantee</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-warning rounded-full animate-pulse"></div>
-            <span>24/7 Expert Support</span>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

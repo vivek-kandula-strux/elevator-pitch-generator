@@ -13,7 +13,7 @@ export const EnhancedHeroSection = ({
   onSearchChange,
   onGetStartedClick
 }: EnhancedHeroSectionProps) => {
-  return <section className="relative min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden bg-background">
+  return <section className="relative min-h-[80vh] flex items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-background">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
       <div className="absolute inset-0 bg-gradient-to-t from-primary/8 via-transparent to-secondary/8" />
@@ -37,7 +37,7 @@ export const EnhancedHeroSection = ({
           
           
           {/* Main Headline */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight mx-0 py-[27px]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight mx-0 py-[27px]">
             Digital Marketing
             <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Amplified With Results
@@ -45,7 +45,7 @@ export const EnhancedHeroSection = ({
           </h1>
           
           {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
+          <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed mb-12">
             Transform your business with comprehensive digital strategies that drive measurable growth. 
             From paid media to creative production - we deliver results that matter.
           </p>
@@ -76,7 +76,7 @@ export const EnhancedHeroSection = ({
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-foreground/70">
               <div className="flex -space-x-2">
                 <div className="w-8 h-8 rounded-full bg-primary/20 border-2 border-background" />
                 <div className="w-8 h-8 rounded-full bg-secondary/20 border-2 border-background" />
@@ -111,8 +111,8 @@ export const EnhancedHeroSection = ({
           number: "85+",
           label: "Projects Delivered"
         }].map((stat, index) => <div key={index} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-primary mb-2">{stat.number}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary mb-2">{stat.number}</div>
+              <div className="text-xs sm:text-sm text-foreground/70">{stat.label}</div>
             </div>)}
         </motion.div>
       </div>
