@@ -56,6 +56,42 @@ export type Database = {
         }
         Relationships: []
       }
+      requirements: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          service_type: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          service_type: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          service_type?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -59,19 +59,28 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     setIsSubmitting(true);
     
     try {
-      // Store data in Supabase without selecting the row (RLS blocks SELECT)
+      // Store data in requirements table
       const { error } = await supabase
-        .from('elevator_pitches')
+        .from('requirements')
         .insert({
           name: formData.name,
-          whatsapp: formData.whatsapp,
+          email: formData.email,
           company: formData.company,
-          category: formData.serviceType,
-          usp: formData.message,
-          specific_ask: 'Requirement form submission'
+          whatsapp: formData.whatsapp,
+          service_type: formData.serviceType,
+          message: formData.message
         });
 
       if (error) throw error;
+
+      // Sync to Google Sheets (non-blocking)
+      try {
+        await supabase.functions.invoke('sync-requirements-to-google-sheets');
+        console.log('Requirements synced to Google Sheets');
+      } catch (syncError) {
+        console.error('Google Sheets sync failed:', syncError);
+        // Continue with email notification even if sync fails
+      }
 
       // Send email notification
       try {
