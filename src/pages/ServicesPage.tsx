@@ -15,7 +15,7 @@ const ServicesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  
 
   const handleCategorySelect = (category: ServiceCategory) => {
     setSelectedCategory(category);
@@ -36,13 +36,6 @@ const ServicesPage = () => {
     setIsFormOpen(false);
   };
 
-  const filteredCategories = serviceCategories.filter(category =>
-    category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.services.some(service => 
-      service.title.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,8 +45,6 @@ const ServicesPage = () => {
       <main className="pt-16">
         {/* Enhanced Hero Section - Mobile-first with better proportions */}
         <EnhancedHeroSection
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
           onGetStartedClick={() => setIsFormOpen(true)}
         />
         

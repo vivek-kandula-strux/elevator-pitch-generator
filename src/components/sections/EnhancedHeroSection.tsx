@@ -1,16 +1,10 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 interface EnhancedHeroSectionProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
   onGetStartedClick: () => void;
 }
 export const EnhancedHeroSection = ({
-  searchTerm,
-  onSearchChange,
   onGetStartedClick
 }: EnhancedHeroSectionProps) => {
   return <section className="relative min-h-[80vh] flex items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-background">
@@ -51,7 +45,7 @@ export const EnhancedHeroSection = ({
           </p>
         </motion.div>
 
-        {/* Search and CTA Section */}
+        {/* CTA Section */}
         <motion.div initial={{
         opacity: 0,
         y: 20
@@ -61,16 +55,9 @@ export const EnhancedHeroSection = ({
       }} transition={{
         duration: 0.6,
         delay: 0.4
-      }} className="max-w-2xl mx-auto space-y-6">
-          {/* Enhanced Search Bar */}
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 z-10" />
-            <Input type="text" placeholder="Search our 60+ specialized services..." value={searchTerm} onChange={e => onSearchChange(e.target.value)} className="pl-12 pr-4 py-4 text-sm md:text-lg bg-card/50 backdrop-blur-sm border-border/50 rounded-2xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300" />
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-          </div>
-          
+      }} className="max-w-2xl mx-auto">
           {/* CTA Button */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8 pb-6 px-4">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4 pb-8 px-4">
             <Button onClick={onGetStartedClick} size="lg" className="group px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-2xl shadow-lg hover:shadow-primary/25 transition-all duration-300">
               Get Started Today
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -97,7 +84,7 @@ export const EnhancedHeroSection = ({
       }} transition={{
         duration: 0.6,
         delay: 0.6
-      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-8 pt-8 pb-12 border-t border-border/50">
+      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12 pt-8 pb-16 border-t border-border/50">
           {[{
           number: "150+",
           label: "Happy Clients"
