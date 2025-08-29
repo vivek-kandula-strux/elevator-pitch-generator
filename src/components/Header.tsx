@@ -15,17 +15,10 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 relative">
-          {/* Logo - Left on desktop, hidden on mobile */}
-          <div className="hidden md:flex items-center">
-            <Link to="/">
-              <Logo />
-            </Link>
-          </div>
-          
-          {/* Mobile Logo Center */}
-          <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
-            <Link to="/">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo - Left on desktop, center on mobile */}
+          <div className="flex items-center md:flex-none flex-1 md:flex-initial justify-center md:justify-start">
+            <Link to="/" className="focus-visible:outline-none">
               <Logo />
             </Link>
           </div>
@@ -68,8 +61,9 @@ const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden absolute right-0"
+            className="md:hidden flex-shrink-0"
             onClick={toggleMobileMenu}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
               <X className="h-5 w-5" />

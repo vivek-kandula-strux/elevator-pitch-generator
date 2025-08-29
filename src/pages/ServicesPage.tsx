@@ -52,8 +52,10 @@ const ServicesPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Enhanced Hero Section */}
-      <EnhancedHeroSection
+      {/* Main Content with proper spacing for fixed header */}
+      <main className="pt-16">
+        {/* Enhanced Hero Section */}
+        <EnhancedHeroSection
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onGetStartedClick={() => setIsFormOpen(true)}
@@ -82,8 +84,9 @@ const ServicesPage = () => {
       {/* FAQ Section */}
       <FAQSection />
       
-      {/* Final CTA Section */}
-      <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
+        {/* Final CTA Section */}
+        <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
+      </main>
 
       {/* Modals */}
       <ServiceCategoryModal
