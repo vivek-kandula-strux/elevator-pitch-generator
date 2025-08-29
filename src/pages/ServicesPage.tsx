@@ -5,14 +5,11 @@ import Header from '../components/Header';
 import { serviceCategories } from '../data/serviceCategories';
 import { ServiceCategory } from '../types/services';
 
-// Import new section components
+// Import optimized section components
 import { EnhancedHeroSection } from '../components/sections/EnhancedHeroSection';
-import { BenefitsSection } from '../components/sections/BenefitsSection';
-import { ValuePropositionSection } from '../components/sections/ValuePropositionSection';
+import { SocialProofSection } from '../components/sections/SocialProofSection';
 import { EnhancedServicesSection } from '../components/sections/EnhancedServicesSection';
 import { PricingSection } from '../components/sections/PricingSection';
-import { TeamSection } from '../components/sections/TeamSection';
-import { FAQSection } from '../components/sections/FAQSection';
 import { FinalCTASection } from '../components/sections/FinalCTASection';
 
 const ServicesPage = () => {
@@ -52,39 +49,30 @@ const ServicesPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Main Content with proper spacing for fixed header */}
+      {/* Main Content with optimized spacing */}
       <main className="pt-16">
-        {/* Enhanced Hero Section */}
+        {/* Enhanced Hero Section - Reduced height for mobile-first design */}
         <EnhancedHeroSection
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onGetStartedClick={() => setIsFormOpen(true)}
-      />
-      
-      {/* Benefits Section */}
-      <BenefitsSection />
-      
-      {/* Value Proposition Section */}
-      <ValuePropositionSection />
-      
-      {/* Enhanced Services Section */}
-      <EnhancedServicesSection
-        filteredCategories={filteredCategories}
-        onCategorySelect={handleCategorySelect}
-        searchTerm={searchTerm}
-        totalCategories={serviceCategories.length}
-      />
-      
-      {/* Pricing Section */}
-      <PricingSection />
-      
-      {/* Team Section */}
-      <TeamSection />
-      
-      {/* FAQ Section */}
-      <FAQSection />
-      
-        {/* Final CTA Section */}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onGetStartedClick={() => setIsFormOpen(true)}
+        />
+        
+        {/* Social Proof Section - Consolidates benefits and achievements */}
+        <SocialProofSection />
+        
+        {/* Enhanced Services Section - Core service offerings */}
+        <EnhancedServicesSection
+          filteredCategories={filteredCategories}
+          onCategorySelect={handleCategorySelect}
+          searchTerm={searchTerm}
+          totalCategories={serviceCategories.length}
+        />
+        
+        {/* Pricing Section - Clear value proposition */}
+        <PricingSection />
+        
+        {/* Final CTA Section - Single conversion point */}
         <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
       </main>
 

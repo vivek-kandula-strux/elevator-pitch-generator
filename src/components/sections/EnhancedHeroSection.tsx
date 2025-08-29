@@ -16,7 +16,7 @@ export const EnhancedHeroSection = ({
   onGetStartedClick 
 }: EnhancedHeroSectionProps) => {
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative min-h-[60vh] md:min-h-[70vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-secondary/5" />
@@ -45,7 +45,7 @@ export const EnhancedHeroSection = ({
           </motion.div>
           
           {/* Main Headline */}
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
             Digital Marketing
             <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Amplified With Results
@@ -53,9 +53,9 @@ export const EnhancedHeroSection = ({
           </h1>
           
           {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed mb-12">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
             Transform your business with comprehensive digital strategies that drive measurable growth. 
-            From paid media to creative production - we deliver results that matter.
+            From strategy to execution - we deliver results that matter.
           </p>
         </motion.div>
 
