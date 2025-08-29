@@ -103,7 +103,7 @@ export const ClientLogoSlider = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 lg:mb-12"
         >
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 lg:mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 lg:mb-4 text-white drop-shadow-sm">
             Trusted by Industry Leaders
           </h2>
           <p className="text-sm lg:text-base text-foreground/75 max-w-2xl mx-auto">
