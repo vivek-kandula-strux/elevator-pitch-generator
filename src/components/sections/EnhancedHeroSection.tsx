@@ -7,7 +7,7 @@ interface EnhancedHeroSectionProps {
 export const EnhancedHeroSection = ({
   onGetStartedClick
 }: EnhancedHeroSectionProps) => {
-  return <section className="relative min-h-[80vh] flex items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-background">
+  return <section className="relative min-h-[60vh] flex items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-16 overflow-hidden bg-background">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
       <div className="absolute inset-0 bg-gradient-to-t from-primary/8 via-transparent to-secondary/8" />
@@ -26,12 +26,9 @@ export const EnhancedHeroSection = ({
         y: 0
       }} transition={{
         duration: 0.8
-      }} className="mb-8">
-          {/* Badge */}
-          
-          
+      }} className="mb-6">
           {/* Main Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight mx-0 py-[27px]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight mx-0 py-3">
             Digital Marketing
             <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Amplified With Results
@@ -39,7 +36,7 @@ export const EnhancedHeroSection = ({
           </h1>
           
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed mb-12">
+          <p className="text-lg sm:text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed mb-8">
             Transform your business with comprehensive digital strategies that drive measurable growth. 
             From paid media to creative production - we deliver results that matter.
           </p>
@@ -57,7 +54,7 @@ export const EnhancedHeroSection = ({
         delay: 0.4
       }} className="max-w-2xl mx-auto">
           {/* CTA Button */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4 pb-8 px-4">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-2 pb-4 px-4">
             <Button onClick={onGetStartedClick} size="lg" className="group px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-2xl shadow-lg hover:shadow-primary/25 transition-all duration-300">
               Get Started Today
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -84,7 +81,7 @@ export const EnhancedHeroSection = ({
       }} transition={{
         duration: 0.6,
         delay: 0.6
-      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12 pt-8 pb-16 border-t border-border/50">
+      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-8 pt-6 pb-8 border-t border-border/50">
           {[{
           number: "150+",
           label: "Happy Clients"
