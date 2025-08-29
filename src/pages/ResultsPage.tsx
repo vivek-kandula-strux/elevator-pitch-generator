@@ -57,30 +57,30 @@ const ResultsPage = () => {
       }
 
       const { data, error } = await supabase
-        .from('elevator_pitches')
-        .select('*')
-        .eq('id', id)
-        .eq('access_token', accessToken)
-        .single();
+        .rpc('get_elevator_pitch_by_token', {
+          pitch_id: id,
+          provided_token: accessToken
+        });
 
       if (error) {
         throw error;
       }
 
-      if (data) {
+      if (data && typeof data === 'object' && data !== null) {
+        const pitchData = data as any; // Type assertion for JSON response
         const formData = {
-          name: data.name,
-          whatsapp: data.whatsapp,
-          company: data.company,
-          category: data.category,
-          usp: data.usp,
-          specificAsk: data.specific_ask
+          name: pitchData.name,
+          whatsapp: pitchData.whatsapp,
+          company: pitchData.company,
+          category: pitchData.category,
+          usp: pitchData.usp,
+          specificAsk: pitchData.specific_ask
         };
 
         const generationData = {
           ...formData,
-          generatedPitch: data.generated_pitch,
-          recordId: data.id
+          generatedPitch: pitchData.generated_pitch,
+          recordId: pitchData.id
         };
 
         setFormData(formData);
