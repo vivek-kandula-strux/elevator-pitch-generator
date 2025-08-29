@@ -59,8 +59,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     setIsSubmitting(true);
     
     try {
-      // Store data in Supabase
-      const { data, error } = await supabase
+      // Store data in Supabase without selecting the row (RLS blocks SELECT)
+      const { error } = await supabase
         .from('elevator_pitches')
         .insert({
           name: formData.name,
@@ -69,9 +69,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
           category: formData.serviceType,
           usp: formData.message,
           specific_ask: 'Requirement form submission'
-        })
-        .select()
-        .single();
+        });
 
       if (error) throw error;
 
