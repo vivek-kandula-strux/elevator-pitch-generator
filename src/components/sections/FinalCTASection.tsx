@@ -75,7 +75,7 @@ export const FinalCTASection = ({
           once: true
         }} className="flex flex-wrap justify-center items-center gap-8 mb-12 text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary" />
+              
               <span>Free Consultation</span>
             </div>
             <div className="flex items-center gap-2">
@@ -101,7 +101,7 @@ export const FinalCTASection = ({
         }} viewport={{
           once: true
         }} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button onClick={onGetStartedClick} size="lg" className="group text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-3xl shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 px-6 sm:px-8 md:px-12 py-3 md:py-4">
+            <Button onClick={onGetStartedClick} size="lg" className="group text-xl font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-3xl shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 py-0 px-[58px]">
               Start Your Transformation
               <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
             </Button>
