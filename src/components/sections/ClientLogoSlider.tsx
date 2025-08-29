@@ -90,9 +90,10 @@ export const ClientLogoSlider = () => {
   const secondRowLogos = [...clientLogos.slice(8), ...clientLogos.slice(8)];
 
   return (
-    <section className="py-12 lg:py-16 bg-muted/20 relative overflow-hidden">
+    <section className="py-12 lg:py-16 bg-muted/30 relative overflow-hidden border-t border-b border-muted/20">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-muted/10 via-background/50 to-muted/10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-glow opacity-10 pointer-events-none" />
       
       <div className="container mx-auto px-4">
         <motion.div

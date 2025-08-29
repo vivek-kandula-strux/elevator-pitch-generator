@@ -10,10 +10,11 @@ interface ModernServicesSectionProps {
 
 export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSectionProps) => {
   return (
-    <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-background">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/5 to-background" />
-      <div className="absolute inset-0 bg-gradient-glow opacity-20" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/10 to-background" />
+      <div className="absolute inset-0 bg-gradient-glow opacity-15" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent" />
       
       <div className="relative max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">

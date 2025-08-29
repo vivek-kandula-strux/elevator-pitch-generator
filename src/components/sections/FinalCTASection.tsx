@@ -7,10 +7,11 @@ interface FinalCTASectionProps {
 export const FinalCTASection = ({
   onGetStartedClick
 }: FinalCTASectionProps) => {
-  return <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  return <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15 border-t border-primary/20">
       {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10 px-0 mx-0" />
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-96 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-full blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/80 to-secondary/20" />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-96 bg-gradient-to-r from-primary/15 to-secondary/15 rounded-full blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-glow opacity-25" />
       
       {/* Floating Elements */}
       <div className="absolute top-10 left-10 w-16 h-16 bg-primary/10 rounded-full blur-xl animate-pulse" />
