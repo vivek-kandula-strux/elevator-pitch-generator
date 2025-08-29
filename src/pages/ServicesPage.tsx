@@ -8,7 +8,7 @@ import { ServiceCategory } from '../types/services';
 // Import optimized section components
 import { EnhancedHeroSection } from '../components/sections/EnhancedHeroSection';
 import { ClientLogoSlider } from '../components/sections/ClientLogoSlider';
-import { ModernServicesSection } from '../components/sections/ModernServicesSection';
+import { EnhancedServicesSection } from '../components/sections/EnhancedServicesSection';
 import { FinalCTASection } from '../components/sections/FinalCTASection';
 
 const ServicesPage = () => {
@@ -61,10 +61,11 @@ const ServicesPage = () => {
         <ClientLogoSlider />
         
         {/* Enhanced Services Section - Core service offerings */}
-        <ModernServicesSection
+        <EnhancedServicesSection
+          filteredCategories={filteredCategories}
           onCategorySelect={handleCategorySelect}
           searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          totalCategories={serviceCategories.length}
         />
         
         {/* Final CTA Section - Single conversion point */}
