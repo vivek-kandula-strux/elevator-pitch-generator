@@ -1,15 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search } from 'lucide-react';
+import { ArrowLeft, Search, Filter } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ServiceCategoryCard } from '../components/ServiceCategoryCard';
 import { ServiceCategoryModal } from '../components/ServiceCategoryModal';
 import { RequirementForm } from '../components/RequirementForm';
-import { HeroSection } from '../components/HeroSection';
-import { TrendsSection } from '../components/TrendsSection';
-import { TeamSection } from '../components/TeamSection';
-import { TestimonialsSection } from '../components/TestimonialsSection';
-import { PricingSection } from '../components/PricingSection';
-import { FAQSection } from '../components/FAQSection';
 import Header from '../components/Header';
 import { serviceCategories } from '../data/serviceCategories';
 import { ServiceCategory } from '../types/services';
@@ -54,35 +49,29 @@ const ServicesPage = () => {
       <Header />
       
       {/* Hero Section */}
-      <HeroSection onGetStarted={() => setIsFormOpen(true)} />
-
-      {/* Trends Section */}
-      <TrendsSection />
-
-      {/* Service Categories Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-16 pt-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-12"
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Solutions We Provide
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Comprehensive digital marketing services across 14 specialized categories. 
-              Each solution is backed by proven methodologies and measurable results.
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+              Full-Service Digital Marketing
+              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
+                Agency Solutions
+              </span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
+              From paid media and creative production to podcast studios and fractional leadership - we offer 14 specialized service categories with 60+ individual solutions. Each service is backed by proven case studies and measurable results.
             </p>
             
             {/* Search Bar */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
               className="max-w-md mx-auto relative"
             >
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
@@ -95,14 +84,19 @@ const ServicesPage = () => {
               />
             </motion.div>
           </motion.div>
+        </div>
+      </section>
 
+      {/* Service Categories Grid */}
+      <section className="pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           {searchTerm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="mb-6"
             >
-              <p className="text-muted-foreground text-center">
+              <p className="text-muted-foreground">
                 Showing {filteredCategories.length} of {serviceCategories.length} service categories
                 {searchTerm && ` for "${searchTerm}"`}
               </p>
@@ -111,9 +105,8 @@ const ServicesPage = () => {
           
           <motion.div
             initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            viewport={{ once: true }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {filteredCategories.map((category, index) => (
@@ -147,41 +140,27 @@ const ServicesPage = () => {
         </div>
       </section>
 
-      {/* Team Section */}
-      <TeamSection />
-
-      {/* Testimonials Section */}
-      <TestimonialsSection />
-
-      {/* Pricing Section */}
-      <PricingSection onGetStarted={() => setIsFormOpen(true)} />
-
-      {/* FAQ Section */}
-      <FAQSection />
-
-      {/* Final CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      {/* CTA Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-8 md:p-12 border border-primary/20"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 md:p-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Ready to Transform Your Digital Presence?
+              Ready to Scale Your Business?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join 500+ businesses that have accelerated their growth with our proven strategies. 
-              Let's discuss how we can drive measurable results for your unique goals.
+              Don't see exactly what you're looking for? Every business is unique, and we create custom strategies tailored to your specific needs and goals.
             </p>
             <Button
               onClick={() => setIsFormOpen(true)}
               size="lg"
-              className="bg-gradient-primary text-primary-foreground px-8 py-4 text-lg font-semibold rounded-xl hover:shadow-primary/25 transition-all duration-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
             >
-              Start Your Growth Journey
+              Discuss Your Requirements
             </Button>
           </motion.div>
         </div>
