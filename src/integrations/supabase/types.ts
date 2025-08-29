@@ -61,7 +61,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_elevator_pitch_by_token: {
+        Args: { pitch_id: string; provided_token: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
