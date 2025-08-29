@@ -70,7 +70,7 @@ export const EnhancedHeroSection = ({
           </div>
           
           {/* CTA Button */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8 pb-12 px-4">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8 pb-6 px-4">
             <Button onClick={onGetStartedClick} size="lg" className="group px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-2xl shadow-lg hover:shadow-primary/25 transition-all duration-300">
               Get Started Today
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
