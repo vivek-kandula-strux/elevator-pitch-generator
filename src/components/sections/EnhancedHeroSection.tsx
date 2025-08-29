@@ -65,7 +65,7 @@ export const EnhancedHeroSection = ({
           {/* Enhanced Search Bar */}
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5 z-10" />
-            <Input type="text" placeholder="Search our 60+ specialized services..." value={searchTerm} onChange={e => onSearchChange(e.target.value)} className="pl-12 pr-4 py-4 text-lg bg-card/50 backdrop-blur-sm border-border/50 rounded-2xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300" />
+            <Input type="text" placeholder="Search our 60+ specialized services..." value={searchTerm} onChange={e => onSearchChange(e.target.value)} className="pl-12 pr-4 py-4 text-sm md:text-lg bg-card/50 backdrop-blur-sm border-border/50 rounded-2xl focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300" />
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
           </div>
           
