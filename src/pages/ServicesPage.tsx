@@ -48,24 +48,33 @@ const ServicesPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Main Content with optimized spacing */}
+      {/* Main Content with optimized spacing and rhythm */}
       <main className="pt-16">
-        {/* Enhanced Hero Section - Reduced height for mobile-first design */}
+        {/* Enhanced Hero Section - Mobile-first with better proportions */}
         <EnhancedHeroSection
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onGetStartedClick={() => setIsFormOpen(true)}
         />
         
-        {/* Client Logo Slider - Modern trust indicators */}
+        {/* Subtle section divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+        
+        {/* Client Logo Slider - Trust indicators */}
         <ClientLogoSlider />
         
-        {/* Modern Services Section - Clean hierarchy with progressive disclosure */}
+        {/* Section divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+        
+        {/* Modern Services Section - Progressive disclosure */}
         <ModernServicesSection
           onGetStartedClick={() => setIsFormOpen(true)}
         />
         
-        {/* Final CTA Section - Single conversion point */}
+        {/* Section divider */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
+        
+        {/* Final CTA Section - Conversion focus */}
         <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
       </main>
 

@@ -90,9 +90,9 @@ export const ClientLogoSlider = () => {
   const secondRowLogos = [...clientLogos.slice(8), ...clientLogos.slice(8)];
 
   return (
-    <section className="py-16 bg-muted/20 relative overflow-hidden">
+    <section className="py-12 lg:py-16 bg-muted/20 relative overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-glow opacity-20 pointer-events-none" />
       
       <div className="container mx-auto px-4">
         <motion.div
@@ -100,12 +100,12 @@ export const ClientLogoSlider = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-8 lg:mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 lg:mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             Trusted by Industry Leaders
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm lg:text-base text-muted-foreground max-w-2xl mx-auto">
             Join thousands of successful businesses that have transformed their digital presence with our solutions.
           </p>
         </motion.div>
@@ -113,7 +113,7 @@ export const ClientLogoSlider = () => {
         {/* Logo slider container */}
         <div className="relative">
           {/* First row - left to right */}
-          <div className="flex overflow-hidden mb-6 relative" style={{
+          <div className="flex overflow-hidden mb-4 lg:mb-6 relative" style={{
             WebkitMask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
             mask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
           }}>
