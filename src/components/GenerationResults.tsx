@@ -1,5 +1,5 @@
 import React from 'react';
-import { Copy, RefreshCw, Clock, ChevronDown } from 'lucide-react';
+import { Copy, RefreshCw, Clock, ChevronDown, Share2, ExternalLink, MessageCircle, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 interface FormData {
   name: string;
@@ -39,6 +39,38 @@ export default function GenerationResults({
       title: "Copied to clipboard!",
       description: "Your elevator pitch has been copied to your clipboard."
     });
+  };
+
+  const createShareContent = () => {
+    return `${primaryPitch}\n\n---\nMade by Strux Digital - 30 Second Generator`;
+  };
+
+  const handleShare = (platform: string) => {
+    const shareContent = createShareContent();
+    const encodedContent = encodeURIComponent(shareContent);
+    const url = window.location.href;
+    
+    switch (platform) {
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodedContent}`, '_blank');
+        break;
+      case 'linkedin':
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodedContent}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodedContent}`, '_blank');
+        break;
+      case 'whatsapp':
+        window.open(`https://wa.me/?text=${encodedContent}`, '_blank');
+        break;
+      case 'copy':
+        navigator.clipboard.writeText(shareContent);
+        toast({
+          title: "Share content copied!",
+          description: "The pitch with attribution has been copied to your clipboard."
+        });
+        break;
+    }
   };
 
   return <div className="max-w-5xl mx-auto animate-fade-in">
@@ -95,11 +127,58 @@ export default function GenerationResults({
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-8">
             <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
               <Copy className="w-5 h-5" />
               <span className="font-semibold">Copy Pitch</span>
             </button>
+          </div>
+
+          {/* Social Sharing Section */}
+          <div className="text-center">
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground mb-3">Share your success</p>
+              <div className="flex justify-center items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => handleShare('twitter')}
+                  className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  title="Share on Twitter"
+                >
+                  <ExternalLink className="w-4 h-4 text-secondary" />
+                </button>
+                <button
+                  onClick={() => handleShare('linkedin')}
+                  className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  title="Share on LinkedIn"
+                >
+                  <User className="w-4 h-4 text-secondary" />
+                </button>
+                <button
+                  onClick={() => handleShare('facebook')}
+                  className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  title="Share on Facebook"
+                >
+                  <Share2 className="w-4 h-4 text-secondary" />
+                </button>
+                <button
+                  onClick={() => handleShare('whatsapp')}
+                  className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4 text-secondary" />
+                </button>
+                <button
+                  onClick={() => handleShare('copy')}
+                  className="w-10 h-10 rounded-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  title="Copy with attribution"
+                >
+                  <Copy className="w-4 h-4 text-secondary" />
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Made by <span className="font-medium text-foreground">Strux Digital</span> - 30 Second Generator
+            </p>
           </div>
         </div>
 
