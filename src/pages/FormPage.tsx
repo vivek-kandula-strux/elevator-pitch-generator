@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BusinessForm from '@/components/BusinessForm';
+import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -54,17 +55,20 @@ const FormPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-subtle relative overflow-hidden">
+      <Header />
+      <div className="py-12 pt-24">
       {/* Background Enhancement */}
       <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none"></div>
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
       
-      <div className="container mx-auto relative z-10">
-        <BusinessForm 
-          onSubmit={handleFormSubmit}
-          isLoading={isLoading}
-        />
+        <div className="container mx-auto relative z-10">
+          <BusinessForm 
+            onSubmit={handleFormSubmit}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );

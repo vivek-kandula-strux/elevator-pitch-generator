@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { ServiceCard } from '../components/ServiceCard';
 import { ServiceModal } from '../components/ServiceModal';
 import { RequirementForm } from '../components/RequirementForm';
+import Header from '../components/Header';
 import { services } from '../data/services';
 import { Service } from '../types/services';
 import { Button } from '../components/ui/button';
@@ -35,28 +36,10 @@ const ServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-40"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/" className="flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to Generator
-              </Link>
-            </Button>
-            <div className="h-6 w-px bg-border" />
-            <h1 className="text-lg font-semibold text-foreground">Digital Marketing Services</h1>
-          </div>
-        </div>
-      </motion.header>
-
+      <Header />
+      
       {/* Hero Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 pt-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -16,34 +18,50 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 relative">
           {/* Logo - Left on desktop, hidden on mobile */}
           <div className="hidden md:flex items-center">
-            <Logo className="h-8 md:h-10 w-auto" />
+            <Link to="/">
+              <Logo className="h-8 md:h-10 w-auto" />
+            </Link>
           </div>
           
           {/* Mobile Logo Center */}
           <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
-            <Logo className="h-8 w-auto" />
+            <Link to="/">
+              <Logo className="h-8 w-auto" />
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a 
-              href="/" 
-              className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium"
+            <Link 
+              to="/" 
+              className={`transition-colors duration-200 font-medium ${
+                location.pathname === '/' 
+                  ? 'text-primary font-semibold' 
+                  : 'text-foreground/80 hover:text-foreground'
+              }`}
             >
               30 Second Generator
-            </a>
-            <a 
-              href="#services" 
-              className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium"
+            </Link>
+            <Link 
+              to="/services" 
+              className={`transition-colors duration-200 font-medium ${
+                location.pathname === '/services' 
+                  ? 'text-primary font-semibold' 
+                  : 'text-foreground/80 hover:text-foreground'
+              }`}
             >
               Our Services
-            </a>
-            <a 
-              href="#support" 
-              className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium"
+            </Link>
+            <Link 
+              to="/contact" 
+              className={`transition-colors duration-200 font-medium ${
+                location.pathname === '/contact' 
+                  ? 'text-primary font-semibold' 
+                  : 'text-foreground/80 hover:text-foreground'
+              }`}
             >
-              Support
-            </a>
+              Contact Us
+            </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -65,27 +83,39 @@ const Header = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
             <nav className="flex flex-col space-y-4 py-4">
-              <a 
-                href="/" 
-                className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium px-2"
+              <Link 
+                to="/" 
+                className={`transition-colors duration-200 font-medium px-2 ${
+                  location.pathname === '/' 
+                    ? 'text-primary font-semibold' 
+                    : 'text-foreground/80 hover:text-foreground'
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 30 Second Generator
-              </a>
-              <a 
-                href="#services" 
-                className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium px-2"
+              </Link>
+              <Link 
+                to="/services" 
+                className={`transition-colors duration-200 font-medium px-2 ${
+                  location.pathname === '/services' 
+                    ? 'text-primary font-semibold' 
+                    : 'text-foreground/80 hover:text-foreground'
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Our Services
-              </a>
-              <a 
-                href="#support" 
-                className="text-foreground/80 hover:text-foreground transition-colors duration-200 font-medium px-2"
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`transition-colors duration-200 font-medium px-2 ${
+                  location.pathname === '/contact' 
+                    ? 'text-primary font-semibold' 
+                    : 'text-foreground/80 hover:text-foreground'
+                }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Support
-              </a>
+                Contact Us
+              </Link>
             </nav>
           </div>
         )}
