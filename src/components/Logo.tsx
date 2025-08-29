@@ -15,12 +15,19 @@ const Logo = ({ className = "", onClick }: LogoProps) => {
   };
 
   return (
-    <img 
-      src="https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Branding/Skill%20Nerchuko%20.png"
-      alt="Skill Nerchuko Logo"
-      className={`cursor-pointer transition-opacity duration-200 hover:opacity-80 ${className}`}
+    <div 
+      className={`flex items-center space-x-3 cursor-pointer transition-opacity duration-200 hover:opacity-80 ${className}`}
       onClick={handleClick}
-    />
+    >
+      <img 
+        src="https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Branding/Skill%20Nerchuko%20.png"
+        alt="Strux Digital Logo"
+        className="h-10 md:h-12 w-auto"
+      />
+      <span className="text-xl md:text-2xl font-bold text-foreground">
+        Strux Digital
+      </span>
+    </div>
   );
 };
 

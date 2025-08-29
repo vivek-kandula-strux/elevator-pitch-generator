@@ -19,14 +19,14 @@ const Header = () => {
           {/* Logo - Left on desktop, hidden on mobile */}
           <div className="hidden md:flex items-center">
             <Link to="/">
-              <Logo className="h-8 md:h-10 w-auto" />
+              <Logo />
             </Link>
           </div>
           
           {/* Mobile Logo Center */}
           <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
             <Link to="/">
-              <Logo className="h-8 w-auto" />
+              <Logo />
             </Link>
           </div>
 
