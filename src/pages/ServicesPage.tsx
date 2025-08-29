@@ -7,9 +7,8 @@ import { ServiceCategory } from '../types/services';
 
 // Import optimized section components
 import { EnhancedHeroSection } from '../components/sections/EnhancedHeroSection';
-import { SocialProofSection } from '../components/sections/SocialProofSection';
+import { ClientLogoSlider } from '../components/sections/ClientLogoSlider';
 import { EnhancedServicesSection } from '../components/sections/EnhancedServicesSection';
-import { PricingSection } from '../components/sections/PricingSection';
 import { FinalCTASection } from '../components/sections/FinalCTASection';
 
 const ServicesPage = () => {
@@ -58,8 +57,8 @@ const ServicesPage = () => {
           onGetStartedClick={() => setIsFormOpen(true)}
         />
         
-        {/* Social Proof Section - Consolidates benefits and achievements */}
-        <SocialProofSection />
+        {/* Client Logo Slider - Modern trust indicators */}
+        <ClientLogoSlider />
         
         {/* Enhanced Services Section - Core service offerings */}
         <EnhancedServicesSection
@@ -68,9 +67,6 @@ const ServicesPage = () => {
           searchTerm={searchTerm}
           totalCategories={serviceCategories.length}
         />
-        
-        {/* Pricing Section - Clear value proposition */}
-        <PricingSection />
         
         {/* Final CTA Section - Single conversion point */}
         <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
