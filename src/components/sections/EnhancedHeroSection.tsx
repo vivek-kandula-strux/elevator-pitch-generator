@@ -97,7 +97,7 @@ export const EnhancedHeroSection = ({
       }} transition={{
         duration: 0.6,
         delay: 0.6
-      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-16 border-t border-border/50">
+      }} className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-8 pt-8 pb-12 border-t border-border/50">
           {[{
           number: "150+",
           label: "Happy Clients"
