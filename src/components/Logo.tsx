@@ -16,8 +16,8 @@ const Logo = ({ className = "", onClick }: LogoProps) => {
 
   return (
     <img 
-      src="/strux-digital-logo.png"
-      alt="Strux Digital Logo"
+      src="https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Branding/Skill%20Nerchuko%20.png"
+      alt="Skill Nerchuko Logo"
       className={`cursor-pointer transition-opacity duration-200 hover:opacity-80 ${className}`}
       onClick={handleClick}
     />
