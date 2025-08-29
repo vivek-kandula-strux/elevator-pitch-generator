@@ -1,13 +1,16 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Rocket, Star, Calendar } from 'lucide-react';
+import { ArrowRight, Rocket, Calendar } from 'lucide-react';
 import { Button } from '../ui/button';
+
 interface FinalCTASectionProps {
   onGetStartedClick: () => void;
 }
+
 export const FinalCTASection = ({
   onGetStartedClick
 }: FinalCTASectionProps) => {
-  return <section className="py-24 px-6 sm:px-8 lg:px-12 xl:px-16 relative overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15 border-t border-primary/20">
+  return (
+    <section className="py-16 lg:py-24 px-6 sm:px-8 lg:px-12 xl:px-16 mb-8 lg:mb-12 relative overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15 border-t border-primary/20">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/80 to-secondary/20" />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-96 bg-gradient-to-r from-primary/15 to-secondary/15 rounded-full blur-3xl" />
@@ -20,30 +23,21 @@ export const FinalCTASection = ({
       <div className="absolute bottom-1/4 left-1/4 w-12 h-12 bg-secondary/20 rounded-full animate-bounce delay-500" />
       
       <div className="relative max-w-5xl mx-auto">
-        <motion.div initial={{
-        opacity: 0,
-        y: 30
-      }} whileInView={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        duration: 0.8
-      }} viewport={{
-        once: true
-      }} className="text-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8 }} 
+          viewport={{ once: true }} 
+          className="text-center"
+        >
           {/* Badge */}
-          <motion.div initial={{
-          opacity: 0,
-          scale: 0.8
-        }} whileInView={{
-          opacity: 1,
-          scale: 1
-        }} transition={{
-          duration: 0.6,
-          delay: 0.2
-        }} viewport={{
-          once: true
-        }} className="inline-flex items-center gap-2 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }} 
+            whileInView={{ opacity: 1, scale: 1 }} 
+            transition={{ duration: 0.6, delay: 0.2 }} 
+            viewport={{ once: true }} 
+            className="inline-flex items-center gap-2 px-6 py-3 mb-8 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 backdrop-blur-sm"
+          >
             <Rocket className="w-5 h-5 text-primary" />
             <span className="font-semibold text-primary">Ready to Transform?</span>
           </motion.div>
@@ -63,22 +57,13 @@ export const FinalCTASection = ({
           </p>
 
           {/* Value Props */}
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.6,
-          delay: 0.4
-        }} viewport={{
-          once: true
-        }} className="flex flex-wrap justify-center items-center gap-8 mb-12 text-foreground/75">
-            <div className="flex items-center gap-2">
-              
-              
-            </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.6, delay: 0.4 }} 
+            viewport={{ once: true }} 
+            className="flex flex-wrap justify-center items-center gap-8 mb-12 text-foreground/75"
+          >
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" />
               <span>Quick 48hr Response</span>
@@ -90,36 +75,37 @@ export const FinalCTASection = ({
           </motion.div>
 
           {/* CTA Buttons */}
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.6,
-          delay: 0.6
-        }} viewport={{
-          once: true
-        }} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button onClick={onGetStartedClick} size="lg" className="group text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-3xl shadow-2xl hover:shadow-primary/30 transition-all duration-300 transform hover:scale-105 py-0 px-8 sm:px-[58px]">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.6, delay: 0.6 }} 
+            viewport={{ once: true }} 
+            className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center mb-8 lg:mb-12"
+          >
+            <Button 
+              onClick={onGetStartedClick} 
+              size="lg" 
+              className="group text-base lg:text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 rounded-2xl shadow-xl hover:shadow-primary/25 transition-all duration-300 transform hover:scale-105 px-6 lg:px-8 py-3 lg:py-4 min-h-[48px]"
+            >
               Start Your Transformation
-              <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" />
+              <ArrowRight className="ml-2 lg:ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
             
             <div className="text-center">
-              <Button variant="outline" size="lg" className="px-6 sm:px-8 py-5 text-base sm:text-lg font-semibold rounded-3xl border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-4 lg:px-6 py-3 lg:py-4 text-sm lg:text-base font-semibold rounded-2xl border-primary/30 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300 min-h-[48px]"
+              >
                 View Our Portfolio
               </Button>
-              <p className="text-xs sm:text-sm text-foreground/70 mt-2">
+              <p className="text-xs text-foreground/70 mt-2">
                 See real results from real clients
               </p>
             </div>
           </motion.div>
-
-          {/* Trust Indicators */}
-          
         </motion.div>
       </div>
-    </section>;
+    </section>
+  );
 };

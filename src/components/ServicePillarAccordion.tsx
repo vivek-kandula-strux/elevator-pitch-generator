@@ -23,15 +23,6 @@ export const ServicePillarAccordion = ({ pillar, onGetQuote }: ServicePillarAcco
       viewport={{ once: true }}
       className="group relative overflow-hidden rounded-2xl border border-border/50 bg-gradient-card backdrop-blur-sm hover:border-border transition-all duration-300"
     >
-      {/* Popular Badge */}
-      {pillar.isPopular && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
-            <Star className="w-3 h-3 fill-current" />
-            Most Popular
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <button

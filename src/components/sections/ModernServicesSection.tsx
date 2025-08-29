@@ -67,25 +67,25 @@ export const ModernServicesSection = ({ onGetStartedClick }: ModernServicesSecti
                 ))}
               </div>
 
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 rounded-2xl bg-gradient-card border border-border/50 mb-6 lg:mb-8">
-                <div className="text-center">
-                  <div className="text-xl lg:text-2xl font-bold text-primary mb-1">500+</div>
-                  <div className="text-xs lg:text-sm text-foreground/70">Projects Delivered</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl lg:text-2xl font-bold text-secondary mb-1">95%</div>
-                  <div className="text-xs lg:text-sm text-foreground/70">Client Retention</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl lg:text-2xl font-bold text-success mb-1">4.8★</div>
-                  <div className="text-xs lg:text-sm text-foreground/70">Average Rating</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl lg:text-2xl font-bold text-warning mb-1">24/7</div>
-                  <div className="text-xs lg:text-sm text-foreground/70">Support Available</div>
-                </div>
-              </div>
+               {/* Stats Grid */}
+               <div className="grid grid-cols-2 gap-4 lg:gap-6 p-4 lg:p-6 rounded-2xl bg-gradient-card border border-border/50 mb-12 lg:mb-16">
+                 <div className="text-center">
+                   <div className="text-xl lg:text-2xl font-bold text-primary mb-1">500+</div>
+                   <div className="text-xs lg:text-sm text-foreground/70">Projects Delivered</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-xl lg:text-2xl font-bold text-secondary mb-1">95%</div>
+                   <div className="text-xs lg:text-sm text-foreground/70">Success Rate</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-xl lg:text-2xl font-bold text-success mb-1">4.8★</div>
+                   <div className="text-xs lg:text-sm text-foreground/70">Average Rating</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-xl lg:text-2xl font-bold text-warning mb-1">24/7</div>
+                   <div className="text-xs lg:text-sm text-foreground/70">Support Available</div>
+                 </div>
+               </div>
 
               {/* CTA Button */}
               <Button

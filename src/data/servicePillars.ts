@@ -4,7 +4,6 @@ export interface ServicePillar {
   description: string;
   icon: string;
   color: string;
-  isPopular?: boolean;
   services: {
     id: string;
     title: string;
@@ -25,7 +24,6 @@ export const servicePillars: ServicePillar[] = [
     description: 'Paid media strategies that scale your business with measurable ROI across all major platforms.',
     icon: '📈',
     color: 'from-primary to-primary-glow',
-    isPopular: true,
     services: [
       {
         id: 'paid-media-strategy',
