@@ -75,6 +75,24 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
 
       if (error) throw error;
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-requirement-notification', {
+          body: {
+            name: formData.name,
+            email: formData.email,
+            company: formData.company,
+            whatsapp: formData.whatsapp,
+            serviceType: formData.serviceType,
+            message: formData.message
+          }
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+        // Don't fail the whole submission if email fails
+      }
+
       toast({
         title: "Requirement submitted successfully!",
         description: "We'll get back to you within 24 hours.",
