@@ -3,15 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function FloatingWidget() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const { trackButtonClick, trackNavigation } = useGTMTracking();
+  const isMobile = useIsMobile();
 
-  // Don't show the widget on the services page since they're already there
-  if (location.pathname === '/services') {
+  // Don't show the widget on mobile devices or the services page
+  if (isMobile || location.pathname === '/services') {
     return null;
   }
 
