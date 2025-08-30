@@ -1,57 +1,147 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
+import { RequirementFormData } from '@/types/services';
+import { serviceCategories } from '@/data/serviceCategories';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { useGTMTracking } from '@/hooks/useGTMTracking';
 import Header from '@/components/Header';
 
-const contactSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  company: z.string().optional(),
-  subject: z.string().min(5, 'Subject must be at least 5 characters'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
-
 const ContactPage = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+  const { trackFormStart, trackFormSubmission, trackRequirementSubmission, trackFormError } = useGTMTracking();
+  
+  const [formData, setFormData] = useState<RequirementFormData>({
+    name: '',
+    email: '',
+    company: '',
+    whatsapp: '',
+    serviceType: '',
+    message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Partial<RequirementFormData>>({});
 
-  const onSubmit = async (data: ContactFormData) => {
+  // Track form start on page load
+  useEffect(() => {
+    trackFormStart('requirement_form');
+  }, [trackFormStart]);
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<RequirementFormData> = {};
+    
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+    if (!formData.company.trim()) newErrors.company = 'Company is required';
+    if (!formData.whatsapp.trim()) newErrors.whatsapp = 'WhatsApp is required';
+    else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
+      newErrors.whatsapp = 'Please enter a valid WhatsApp number';
+    }
+    if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
+    if (!formData.message.trim()) newErrors.message = 'Requirements are required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      const errorFields = Object.keys(errors).join(', ');
+      trackFormError('requirement_form', `Validation failed: ${errorFields}`);
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // Simulate form submission - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Track form submission
+      trackFormSubmission('requirement_form', {
+        service_category: formData.serviceType,
+        company: formData.company,
+        form_step: 'completed'
+      });
+
+      // Store data in requirements table
+      const { error } = await supabase
+        .from('requirements')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          whatsapp: formData.whatsapp,
+          service_type: formData.serviceType,
+          message: formData.message
+        });
+
+      if (error) throw error;
+
+      // Sync to Google Sheets (non-blocking)
+      try {
+        await supabase.functions.invoke('sync-requirements-to-google-sheets');
+        console.log('Requirements synced to Google Sheets');
+      } catch (syncError) {
+        console.error('Google Sheets sync failed:', syncError);
+      }
+
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-requirement-notification', {
+          body: {
+            name: formData.name,
+            email: formData.email,
+            company: formData.company,
+            whatsapp: formData.whatsapp,
+            serviceType: formData.serviceType,
+            message: formData.message
+          }
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+      }
+
+      // Track successful requirement submission
+      trackRequirementSubmission(formData.serviceType);
+
       toast({
-        title: "Message Sent Successfully!",
+        title: "Requirement submitted successfully!",
         description: "We'll get back to you within 24 hours.",
       });
+
+      setIsSubmitted(true);
       
-      reset();
+      // Reset form after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({ 
+          name: '', 
+          email: '', 
+          company: '',
+          whatsapp: '',
+          serviceType: '', 
+          message: '' 
+        });
+        setErrors({});
+      }, 5000);
+
     } catch (error) {
+      console.error('Error submitting requirement:', error);
       toast({
-        variant: "destructive",
-        title: "Failed to Send Message",
-        description: "Please try again or contact us directly.",
+        title: "Error submitting requirement",
+        description: "Please try again later.",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
@@ -70,185 +160,172 @@ const ContactPage = () => {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mx-auto">
             {/* Header Section */}
-            <div className="text-center mb-16 fade-in">
+            <div className="text-center mb-12 fade-in">
               <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 glow-text">
-                Get In Touch
+                Get Started Today
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Ready to elevate your business? Let's discuss how we can help you achieve your digital marketing goals.
+              <p className="text-xl text-muted-foreground">
+                Tell us about your project needs and we'll get back to you within 24 hours.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12 items-start">
-              {/* Contact Information */}
-              <div className="space-y-8 slide-up">
-                <Card className="glass-card border-card-border p-8">
+            {/* Form Card */}
+            <Card className="form-card p-8 scale-in">
+              {!isSubmitted ? (
+                <>
                   <CardHeader className="p-0 mb-8">
-                    <CardTitle className="text-2xl font-bold text-foreground mb-2">
-                      Let's Start a Conversation
+                    <CardTitle className="text-2xl font-bold text-foreground">
+                      Project Requirements
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground text-lg">
-                      We're here to help your business grow with tailored digital marketing solutions.
+                    <CardDescription className="text-muted-foreground">
+                      Fill out the form below and our team will contact you soon.
                     </CardDescription>
                   </CardHeader>
-                  
-                  <div className="space-y-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Mail className="w-5 h-5 text-primary" />
-                      </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="font-semibold text-foreground mb-1">Email Us</h3>
-                        <p className="text-muted-foreground">hello@struxdigital.com</p>
-                        <p className="text-sm text-muted-foreground">We typically respond within 2 hours</p>
+                        <Label htmlFor="name" className="form-label">
+                          Full Name *
+                        </Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                          className={`form-input ${errors.name ? 'border-destructive' : ''}`}
+                          placeholder="Your name"
+                        />
+                        {errors.name && (
+                          <p className="text-destructive text-sm mt-2">{errors.name}</p>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-5 h-5 text-secondary" />
-                      </div>
                       <div>
-                        <h3 className="font-semibold text-foreground mb-1">Call Us</h3>
-                        <p className="text-muted-foreground">+1 (555) 123-4567</p>
-                        <p className="text-sm text-muted-foreground">Mon-Fri, 9 AM - 6 PM EST</p>
+                        <Label htmlFor="email" className="form-label">
+                          Email Address *
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                          className={`form-input ${errors.email ? 'border-destructive' : ''}`}
+                          placeholder="your@email.com"
+                        />
+                        {errors.email && (
+                          <p className="text-destructive text-sm mt-2">{errors.email}</p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5 text-accent-foreground" />
-                      </div>
+                    <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="font-semibold text-foreground mb-1">Visit Us</h3>
-                        <p className="text-muted-foreground">123 Business District</p>
-                        <p className="text-muted-foreground">New York, NY 10001</p>
+                        <Label htmlFor="company" className="form-label">
+                          Company *
+                        </Label>
+                        <Input
+                          id="company"
+                          type="text"
+                          value={formData.company}
+                          onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                          className={`form-input ${errors.company ? 'border-destructive' : ''}`}
+                          placeholder="Your company"
+                        />
+                        {errors.company && (
+                          <p className="text-destructive text-sm mt-2">{errors.company}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="whatsapp" className="form-label">
+                          WhatsApp *
+                        </Label>
+                        <Input
+                          id="whatsapp"
+                          type="tel"
+                          value={formData.whatsapp}
+                          onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
+                          className={`form-input ${errors.whatsapp ? 'border-destructive' : ''}`}
+                          placeholder="+1 555 123 4567"
+                        />
+                        {errors.whatsapp && (
+                          <p className="text-destructive text-sm mt-2">{errors.whatsapp}</p>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </Card>
 
-                {/* Quick Stats */}
-                <Card className="glass-card border-card-border p-6">
-                  <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-primary mb-1">24h</div>
-                      <div className="text-sm text-muted-foreground">Response Time</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-secondary mb-1">500+</div>
-                      <div className="text-sm text-muted-foreground">Happy Clients</div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Contact Form */}
-              <Card className="form-card p-8 scale-in">
-                <CardHeader className="p-0 mb-8">
-                  <CardTitle className="text-2xl font-bold text-foreground">
-                    Send Us a Message
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Fill out the form below and we'll get back to you as soon as possible.
-                  </CardDescription>
-                </CardHeader>
-
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name" className="form-label">
-                        Full Name *
+                      <Label htmlFor="serviceType" className="form-label">
+                        Service Type *
                       </Label>
-                      <Input
-                        id="name"
-                        {...register('name')}
-                        className="form-input"
-                        placeholder="Your full name"
-                      />
-                      {errors.name && (
-                        <p className="text-destructive text-sm mt-2">{errors.name.message}</p>
+                      <Select
+                        value={formData.serviceType}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, serviceType: value }))}
+                      >
+                        <SelectTrigger className={`form-input ${errors.serviceType ? 'border-destructive' : ''}`}>
+                          <SelectValue placeholder="Select service" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {serviceCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.icon} {category.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.serviceType && (
+                        <p className="text-destructive text-sm mt-2">{errors.serviceType}</p>
                       )}
                     </div>
 
                     <div>
-                      <Label htmlFor="email" className="form-label">
-                        Email Address *
+                      <Label htmlFor="message" className="form-label">
+                        Project Requirements *
                       </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        {...register('email')}
-                        className="form-input"
-                        placeholder="your@email.com"
+                      <Textarea
+                        id="message"
+                        value={formData.message}
+                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                        className={`form-input min-h-[120px] resize-none ${errors.message ? 'border-destructive' : ''}`}
+                        placeholder="Describe your project needs, goals, timeline, and any specific requirements..."
+                        rows={5}
                       />
-                      {errors.email && (
-                        <p className="text-destructive text-sm mt-2">{errors.email.message}</p>
+                      {errors.message && (
+                        <p className="text-destructive text-sm mt-2">{errors.message}</p>
                       )}
                     </div>
-                  </div>
 
-                  <div>
-                    <Label htmlFor="company" className="form-label">
-                      Company (Optional)
-                    </Label>
-                    <Input
-                      id="company"
-                      {...register('company')}
-                      className="form-input"
-                      placeholder="Your company name"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="subject" className="form-label">
-                      Subject *
-                    </Label>
-                    <Input
-                      id="subject"
-                      {...register('subject')}
-                      className="form-input"
-                      placeholder="What can we help you with?"
-                    />
-                    {errors.subject && (
-                      <p className="text-destructive text-sm mt-2">{errors.subject.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="message" className="form-label">
-                      Message *
-                    </Label>
-                    <Textarea
-                      id="message"
-                      {...register('message')}
-                      className="form-input min-h-[120px] resize-none"
-                      placeholder="Tell us about your project and goals..."
-                    />
-                    {errors.message && (
-                      <p className="text-destructive text-sm mt-2">{errors.message.message}</p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn-primary w-full group"
-                  >
-                    <span className="flex items-center justify-center gap-2">
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn-primary w-full"
+                    >
                       {isSubmitting ? (
-                        <div className="progress-ring w-4 h-4"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="progress-ring w-4 h-4"></div>
+                          Submitting...
+                        </div>
                       ) : (
-                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        'Submit Requirements'
                       )}
-                      {isSubmitting ? 'Sending...' : 'Send Message'}
-                    </span>
-                  </Button>
-                </form>
-              </Card>
-            </div>
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <CardTitle className="text-2xl font-bold text-foreground mb-2">
+                    Thank You!
+                  </CardTitle>
+                  <CardDescription className="text-lg">
+                    We've received your requirements and will contact you within 24 hours.
+                  </CardDescription>
+                </div>
+              )}
+            </Card>
           </div>
         </div>
       </div>
