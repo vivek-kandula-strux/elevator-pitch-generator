@@ -1,86 +1,45 @@
 import { motion } from 'framer-motion';
 
-// Mock client logos data - using popular company names with simple SVG designs
+// Client logos with actual storage paths
 const clientLogos = [
-  { name: "Microsoft", id: 1 },
-  { name: "Apple", id: 2 },
-  { name: "Google", id: 3 },
-  { name: "Amazon", id: 4 },
-  { name: "Meta", id: 5 },
-  { name: "Netflix", id: 6 },
-  { name: "Spotify", id: 7 },
-  { name: "Adobe", id: 8 },
-  { name: "Tesla", id: 9 },
-  { name: "Uber", id: 10 },
-  { name: "Airbnb", id: 11 },
-  { name: "Shopify", id: 12 },
-  { name: "Stripe", id: 13 },
-  { name: "Slack", id: 14 },
-  { name: "Zoom", id: 15 },
-  { name: "Dropbox", id: 16 },
+  { name: "Microsoft", id: 1, filename: "1.png" },
+  { name: "Apple", id: 2, filename: "2.png" },
+  { name: "Google", id: 3, filename: "3.png" },
+  { name: "Amazon", id: 4, filename: "4.png" },
+  { name: "Meta", id: 5, filename: "5.png" },
+  { name: "Netflix", id: 6, filename: "6.png" },
+  { name: "Spotify", id: 7, filename: "7.png" },
+  { name: "Adobe", id: 8, filename: "8.png" },
+  { name: "Tesla", id: 9, filename: "9.png" },
+  { name: "Uber", id: 10, filename: "10.png" },
+  { name: "Airbnb", id: 11, filename: "11.png" },
+  { name: "Shopify", id: 12, filename: "12.png" },
+  { name: "Stripe", id: 13, filename: "13.png" },
+  { name: "Slack", id: 14, filename: "14.png" },
+  { name: "Zoom", id: 15, filename: "15.png" },
 ];
 
-// Simple SVG logo component that creates a stylized company logo
-const LogoSVG = ({ name, className }: { name: string; className?: string }) => {
-  const initial = name.charAt(0);
-  const colors = [
-    'hsl(210 100% 55%)', // primary
-    'hsl(260 75% 65%)', // secondary 
-    'hsl(148 70% 55%)', // success
-    'hsl(38 92% 55%)', // warning
-  ];
-  const color = colors[name.length % colors.length];
+const SUPABASE_STORAGE_URL = "https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Client%20Logos";
 
+// Client logo image component with error handling
+const ClientLogo = ({ logo, className }: { logo: { name: string; filename: string }; className?: string }) => {
   return (
-    <svg
-      viewBox="0 0 120 40"
-      className={`w-28 h-10 ${className}`}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Background pill */}
-      <rect
-        x="0"
-        y="8"
-        width="120"
-        height="24"
-        rx="12"
-        fill="currentColor"
-        opacity="0.1"
-      />
-      
-      {/* Company initial circle */}
-      <circle
-        cx="20"
-        cy="20"
-        r="10"
-        fill={color}
-        opacity="0.8"
-      />
-      
-      {/* Company initial text */}
-      <text
-        x="20"
-        y="25"
-        textAnchor="middle"
-        fontSize="12"
-        fontWeight="600"
-        fill="white"
-      >
-        {initial}
-      </text>
-      
-      {/* Company name */}
-      <text
-        x="38"
-        y="24"
-        fontSize="11"
-        fontWeight="500"
-        fill="currentColor"
-        opacity="0.8"
-      >
-        {name}
-      </text>
-    </svg>
+    <img
+      src={`${SUPABASE_STORAGE_URL}/${logo.filename}`}
+      alt={`${logo.name} logo`}
+      className={`w-28 h-10 object-contain filter brightness-75 hover:brightness-100 transition-all duration-300 ${className}`}
+      loading="lazy"
+      onError={(e) => {
+        // Fallback to a placeholder if image fails to load
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+        target.parentElement!.innerHTML = `
+          <div class="w-28 h-10 flex items-center justify-center bg-muted/20 rounded border border-muted/40">
+            <span class="text-xs text-muted-foreground font-medium">${logo.name}</span>
+          </div>
+        `;
+      }}
+    />
   );
 };
 
@@ -137,9 +96,9 @@ export const ClientLogoSlider = () => {
                   title={logo.name}
                 >
                   <div className="glass-card p-4 rounded-xl transition-all duration-300 group-hover:shadow-primary/20">
-                    <LogoSVG 
-                      name={logo.name} 
-                      className="text-muted-foreground group-hover:text-foreground transition-colors duration-300" 
+                    <ClientLogo 
+                      logo={logo} 
+                      className="group-hover:scale-105 transition-transform duration-300" 
                     />
                   </div>
                 </motion.div>
@@ -171,9 +130,9 @@ export const ClientLogoSlider = () => {
                   title={logo.name}
                 >
                   <div className="glass-card p-4 rounded-xl transition-all duration-300 group-hover:shadow-primary/20">
-                    <LogoSVG 
-                      name={logo.name} 
-                      className="text-muted-foreground group-hover:text-foreground transition-colors duration-300" 
+                    <ClientLogo 
+                      logo={logo} 
+                      className="group-hover:scale-105 transition-transform duration-300" 
                     />
                   </div>
                 </motion.div>
