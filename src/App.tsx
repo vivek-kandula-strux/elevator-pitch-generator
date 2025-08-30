@@ -17,10 +17,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <TooltipProvider>
-        <GTMProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <GTMProvider>
             <Routes>
               <Route path="/" element={<FormPage />} />
               <Route path="/services" element={<ServicesPage />} />
@@ -29,8 +29,8 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </GTMProvider>
+          </GTMProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
