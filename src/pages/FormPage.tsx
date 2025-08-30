@@ -3,15 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import BusinessForm from '@/components/BusinessForm';
 import Header from '@/components/Header';
 import { FormSkeleton } from '@/components/loading/PageSkeleton';
+import { useCreateElevatorPitch } from '@/hooks/useOptimizedQueries';
+import { useToast } from '@/hooks/use-toast';
+import { useGTMTracking } from '@/hooks/useGTMTracking';
 
 // Lazy load MobileSlider since it contains animations
 const LazyMobileSlider = React.lazy(() => 
   import('@/components/MobileSlider').then(module => ({ default: module.MobileSlider }))
 );
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useGTMTracking } from '@/hooks/useGTMTracking';
-
 interface FormData {
   name: string;
   whatsapp: string;
@@ -22,22 +21,16 @@ interface FormData {
 }
 
 const FormPage = () => {
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { trackPitchGeneration } = useGTMTracking();
+  
+  // Use optimized mutation with caching
+  const createElevatorPitchMutation = useCreateElevatorPitch();
 
   const handleFormSubmit = async (data: FormData) => {
-    setIsLoading(true);
-    
     try {
-      const { data: result, error } = await supabase.functions.invoke('generate-elevator-pitch', {
-        body: { formData: data }
-      });
-
-      if (error) {
-        throw error;
-      }
+      const result = await createElevatorPitchMutation.mutateAsync(data);
 
       // Track successful pitch generation
       trackPitchGeneration(data.company, data.category, result.recordId);
@@ -60,8 +53,6 @@ const FormPage = () => {
         title: "Generation Failed",
         description: "Unable to generate your elevator pitch. Please try again.",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -77,7 +68,7 @@ const FormPage = () => {
         <div className="container mx-auto relative z-10">
           <BusinessForm 
             onSubmit={handleFormSubmit}
-            isLoading={isLoading}
+            isLoading={createElevatorPitchMutation.isPending}
           />
           
           {/* Mobile Marketing Slider */}

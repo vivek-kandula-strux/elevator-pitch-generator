@@ -9,6 +9,7 @@ import { GTMProvider } from "@/contexts/GTMContext";
 import { FloatingWidget } from "@/components/FloatingWidget";
 import { PageSkeleton, ServicesSkeleton } from "@/components/loading/PageSkeleton";
 import { measureFCP, estimateBundleImpact, logBundleSplit } from "@/utils/performanceMonitor";
+import { AppOptimizations, PerformanceAnalytics } from "@/components/AppOptimizations";
 
 // Import FormPage immediately (main landing page)
 import FormPage from "./pages/FormPage";
@@ -30,7 +31,30 @@ const LazyResultsPage = lazy(() => {
   return import("./pages/ResultsPage");
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Aggressive caching: data stays fresh for 5 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      // Keep data in cache for 15 minutes (gcTime is the new name for cacheTime)
+      gcTime: 15 * 60 * 1000, // 15 minutes
+      // Reduce retries to minimize API calls
+      retry: 1,
+      // Disable refetch on window focus to reduce API calls
+      refetchOnWindowFocus: false,
+      // Background refetch every 2 minutes for fresh data
+      refetchInterval: 2 * 60 * 1000, // 2 minutes
+      // Enable background refetch only when window is focused
+      refetchIntervalInBackground: false,
+      // Request deduplication - avoid duplicate requests
+      refetchOnMount: true,
+      refetchOnReconnect: 'always',
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 const App = () => {
   // Monitor performance on app load
@@ -47,6 +71,10 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <GTMProvider>
+            {/* Performance optimizations */}
+            <AppOptimizations />
+            <PerformanceAnalytics />
+            
             <Routes>
               <Route path="/" element={<FormPage />} />
               <Route 

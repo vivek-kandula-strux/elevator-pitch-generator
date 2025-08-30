@@ -1,14 +1,13 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { GenerationResultsWithSuspense } from '@/components/lazy/LazyComponents';
+import { useElevatorPitchByToken } from '@/hooks/useOptimizedQueries';
+import { useToast } from '@/hooks/use-toast';
 
 // Lazy load MobileSlider since it contains animations
 const LazyMobileSlider = React.lazy(() => 
   import('@/components/MobileSlider').then(module => ({ default: module.MobileSlider }))
 );
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
 interface FormData {
   name: string;
   whatsapp: string;
@@ -35,7 +34,12 @@ const ResultsPage = () => {
   
   const [formData, setFormData] = useState<FormData | null>(null);
   const [generationData, setGenerationData] = useState<GenerationData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Use optimized query with caching
+  const { data: pitchData, isLoading, error } = useElevatorPitchByToken(
+    recordId || '', 
+    accessToken || ''
+  );
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -45,55 +49,35 @@ const ResultsPage = () => {
     if (location.state?.generationData && location.state?.formData) {
       setGenerationData(location.state.generationData);
       setFormData(location.state.formData);
-    } else if (recordId) {
-      // Fetch data from database using recordId
-      fetchDataFromDatabase(recordId);
-    } else {
+    } else if (pitchData) {
+      // Use data from optimized query (type assertion for JSON response)
+      const pitchDataTyped = pitchData as any;
+      const formData = {
+        name: pitchDataTyped.name,
+        whatsapp: pitchDataTyped.whatsapp,
+        company: pitchDataTyped.company,
+        category: pitchDataTyped.category,
+        usp: pitchDataTyped.usp,
+        specificAsk: pitchDataTyped.specific_ask
+      };
+
+      const generationData = {
+        ...formData,
+        generatedPitch: pitchDataTyped.generated_pitch,
+        recordId: pitchDataTyped.id
+      };
+
+      setFormData(formData);
+      setGenerationData(generationData);
+    } else if (!recordId) {
       // No recordId, redirect to form
       navigate('/');
     }
-  }, [recordId, location.state, navigate]);
+  }, [recordId, location.state, navigate, pitchData]);
 
-  const fetchDataFromDatabase = async (id: string) => {
-    setIsLoading(true);
-    try {
-      if (!accessToken) {
-        throw new Error('Access token required');
-      }
-
-      const { data, error } = await supabase
-        .rpc('get_elevator_pitch_by_token', {
-          pitch_id: id,
-          provided_token: accessToken
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && typeof data === 'object' && data !== null) {
-        const pitchData = data as any; // Type assertion for JSON response
-        const formData = {
-          name: pitchData.name,
-          whatsapp: pitchData.whatsapp,
-          company: pitchData.company,
-          category: pitchData.category,
-          usp: pitchData.usp,
-          specificAsk: pitchData.specific_ask
-        };
-
-        const generationData = {
-          ...formData,
-          generatedPitch: pitchData.generated_pitch,
-          recordId: pitchData.id
-        };
-
-        setFormData(formData);
-        setGenerationData(generationData);
-      } else {
-        throw new Error('No data found');
-      }
-    } catch (error) {
+  useEffect(() => {
+    // Handle query errors
+    if (error) {
       console.error('Error fetching pitch data:', error);
       toast({
         variant: "destructive",
@@ -101,10 +85,8 @@ const ResultsPage = () => {
         description: "Unable to load the elevator pitch. The link may be invalid or expired.",
       });
       navigate('/');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [error, navigate, toast]);
 
   const handleStartOver = () => {
     navigate('/');

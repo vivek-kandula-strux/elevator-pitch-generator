@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle } from 'lucide-react';
 import { RequirementFormData } from '@/types/services';
 import { serviceCategories } from '@/data/serviceCategories';
-import { supabase } from '@/integrations/supabase/client';
+import { useSubmitRequirement } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
 import Header from '@/components/Header';
@@ -16,6 +16,9 @@ import Header from '@/components/Header';
 const ContactPage = () => {
   const { toast } = useToast();
   const { trackFormStart, trackFormSubmission, trackRequirementSubmission, trackFormError } = useGTMTracking();
+  
+  // Use optimized mutation
+  const submitRequirementMutation = useSubmitRequirement();
   
   const [formData, setFormData] = useState<RequirementFormData>({
     name: '',
@@ -25,7 +28,6 @@ const ContactPage = () => {
     serviceType: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Partial<RequirementFormData>>({});
 
@@ -63,8 +65,6 @@ const ContactPage = () => {
       return;
     }
     
-    setIsSubmitting(true);
-    
     try {
       // Track form submission
       trackFormSubmission('requirement_form', {
@@ -73,44 +73,8 @@ const ContactPage = () => {
         form_step: 'completed'
       });
 
-      // Store data in requirements table
-      const { error } = await supabase
-        .from('requirements')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          company: formData.company,
-          whatsapp: formData.whatsapp,
-          service_type: formData.serviceType,
-          message: formData.message
-        });
-
-      if (error) throw error;
-
-      // Sync to Google Sheets (non-blocking)
-      try {
-        await supabase.functions.invoke('sync-requirements-to-google-sheets');
-        console.log('Requirements synced to Google Sheets');
-      } catch (syncError) {
-        console.error('Google Sheets sync failed:', syncError);
-      }
-
-      // Send email notification
-      try {
-        await supabase.functions.invoke('send-requirement-notification', {
-          body: {
-            name: formData.name,
-            email: formData.email,
-            company: formData.company,
-            whatsapp: formData.whatsapp,
-            serviceType: formData.serviceType,
-            message: formData.message
-          }
-        });
-        console.log('Email notification sent successfully');
-      } catch (emailError) {
-        console.error('Email notification failed:', emailError);
-      }
+      // Use optimized mutation
+      await submitRequirementMutation.mutateAsync(formData);
 
       // Track successful requirement submission
       trackRequirementSubmission(formData.serviceType);
@@ -143,8 +107,6 @@ const ContactPage = () => {
         description: "Please try again later.",
         variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -300,10 +262,10 @@ const ContactPage = () => {
 
                     <Button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={submitRequirementMutation.isPending}
                       className="btn-primary w-full"
                     >
-                      {isSubmitting ? (
+                      {submitRequirementMutation.isPending ? (
                         <div className="flex items-center gap-2">
                           <div className="progress-ring w-4 h-4"></div>
                           Submitting...
