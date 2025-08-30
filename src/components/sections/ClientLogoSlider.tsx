@@ -24,19 +24,19 @@ const SUPABASE_STORAGE_URL = "https://sgggqrcwfcbtyianduyo.supabase.co/storage/v
 // Client logo image component with error handling
 const ClientLogo = ({ logo, className }: { logo: { name: string; filename: string }; className?: string }) => {
   return (
-    <div className="relative w-36 h-14 flex items-center justify-center bg-background/90 backdrop-blur-sm rounded-lg border border-border/40">
+    <div className="relative w-36 h-14 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg border border-slate-200/60 shadow-sm">
       <img
         src={`${SUPABASE_STORAGE_URL}/${logo.filename}`}
         alt={`${logo.name} logo`}
-        className={`max-w-32 max-h-10 object-contain filter hover:brightness-110 transition-all duration-300 ${className}`}
+        className={`max-w-32 max-h-10 object-contain hover:brightness-110 transition-all duration-300 ${className}`}
         loading="lazy"
         onError={(e) => {
           // Fallback to a placeholder if image fails to load
           const target = e.target as HTMLImageElement;
           target.style.display = 'none';
           target.parentElement!.innerHTML = `
-            <div class="w-36 h-14 flex items-center justify-center bg-background/90 rounded-lg border border-border/40">
-              <span class="text-sm text-foreground/80 font-medium">${logo.name}</span>
+            <div class="w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm">
+              <span class="text-sm text-slate-700 font-medium">${logo.name}</span>
             </div>
           `;
         }}
