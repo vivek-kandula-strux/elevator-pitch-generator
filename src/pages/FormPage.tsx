@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BusinessForm from '@/components/BusinessForm';
 import Header from '@/components/Header';
-import { MobileSlider } from '@/components/MobileSlider';
+import { FormSkeleton } from '@/components/loading/PageSkeleton';
+
+// Lazy load MobileSlider since it contains animations
+const LazyMobileSlider = React.lazy(() => 
+  import('@/components/MobileSlider').then(module => ({ default: module.MobileSlider }))
+);
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
@@ -76,7 +81,9 @@ const FormPage = () => {
           />
           
           {/* Mobile Marketing Slider */}
-          <MobileSlider />
+          <Suspense fallback={<div className="h-32" />}>
+            <LazyMobileSlider />
+          </Suspense>
         </div>
       </div>
     </div>

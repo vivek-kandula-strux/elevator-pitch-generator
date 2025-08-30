@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { ServiceCategoryModal } from '../components/ServiceCategoryModal';
-import { RequirementForm } from '../components/RequirementForm';
+import { useState, Suspense } from 'react';
 import Header from '../components/Header';
-import { serviceCategories } from '../data/serviceCategories';
 import { ServiceCategory } from '../types/services';
-
-// Import optimized section components
-import { EnhancedHeroSection } from '../components/sections/EnhancedHeroSection';
-import { ClientLogoSlider } from '../components/sections/ClientLogoSlider';
-import { ModernServicesSection } from '../components/sections/ModernServicesSection';
-import { FinalCTASection } from '../components/sections/FinalCTASection';
+import { 
+  LazyEnhancedHeroSection,
+  LazyClientLogoSlider,
+  LazyModernServicesSection,
+  LazyFinalCTASection,
+  ServiceCategoryModalWithSuspense,
+  RequirementFormWithSuspense
+} from '../components/lazy/LazyFramerMotion';
+import { 
+  HeroSkeleton, 
+  ServicesSectionSkeleton, 
+  CTASkeleton 
+} from '../components/loading/SectionSkeleton';
 
 const ServicesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
@@ -44,40 +48,48 @@ const ServicesPage = () => {
       {/* Main Content with optimized spacing and rhythm */}
       <main className="pt-16">
         {/* Enhanced Hero Section - Mobile-first with better proportions */}
-        <EnhancedHeroSection
-          onGetStartedClick={() => setIsFormOpen(true)}
-        />
+        <Suspense fallback={<HeroSkeleton />}>
+          <LazyEnhancedHeroSection
+            onGetStartedClick={() => setIsFormOpen(true)}
+          />
+        </Suspense>
         
         {/* Subtle section divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         
         {/* Client Logo Slider - Trust indicators */}
-        <ClientLogoSlider />
+        <Suspense fallback={<ServicesSectionSkeleton />}>
+          <LazyClientLogoSlider />
+        </Suspense>
         
         {/* Section divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         
         {/* Modern Services Section - Progressive disclosure */}
-        <ModernServicesSection
-          onGetStartedClick={() => setIsFormOpen(true)}
-        />
+        <Suspense fallback={<ServicesSectionSkeleton />}>
+          <LazyModernServicesSection
+            onGetStartedClick={() => setIsFormOpen(true)}
+          />
+        </Suspense>
         
         {/* Section divider */}
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         
         {/* Final CTA Section - Conversion focus */}
-        <FinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
+        <Suspense fallback={<CTASkeleton />}>
+          <LazyFinalCTASection onGetStartedClick={() => setIsFormOpen(true)} />
+        </Suspense>
       </main>
 
       {/* Modals */}
-      <ServiceCategoryModal
+      <ServiceCategoryModalWithSuspense
         category={selectedCategory}
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onRequirementClick={handleRequirementClick}
       />
       
-      <RequirementForm
+      <RequirementFormWithSuspense
         isOpen={isFormOpen}
         onClose={handleFormClose}
         preSelectedService={selectedCategory?.id}

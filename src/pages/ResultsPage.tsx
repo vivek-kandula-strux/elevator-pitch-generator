@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import GenerationResults from '@/components/GenerationResults';
-import { MobileSlider } from '@/components/MobileSlider';
+import { GenerationResultsWithSuspense } from '@/components/lazy/LazyComponents';
+
+// Lazy load MobileSlider since it contains animations
+const LazyMobileSlider = React.lazy(() => 
+  import('@/components/MobileSlider').then(module => ({ default: module.MobileSlider }))
+);
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -132,14 +136,16 @@ const ResultsPage = () => {
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
       
       <div className="container mx-auto relative z-10">
-        <GenerationResults 
+        <GenerationResultsWithSuspense 
           formData={formData}
           generationData={generationData}
           onStartOver={handleStartOver}
         />
         
         {/* Mobile Marketing Slider */}
-        <MobileSlider />
+        <Suspense fallback={<div className="h-32" />}>
+          <LazyMobileSlider />
+        </Suspense>
       </div>
     </div>
   );
