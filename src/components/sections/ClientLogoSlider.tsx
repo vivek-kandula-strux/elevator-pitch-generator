@@ -24,22 +24,24 @@ const SUPABASE_STORAGE_URL = "https://sgggqrcwfcbtyianduyo.supabase.co/storage/v
 // Client logo image component with error handling
 const ClientLogo = ({ logo, className }: { logo: { name: string; filename: string }; className?: string }) => {
   return (
-    <img
-      src={`${SUPABASE_STORAGE_URL}/${logo.filename}`}
-      alt={`${logo.name} logo`}
-      className={`w-28 h-10 object-contain filter brightness-75 hover:brightness-100 transition-all duration-300 ${className}`}
-      loading="lazy"
-      onError={(e) => {
-        // Fallback to a placeholder if image fails to load
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-        target.parentElement!.innerHTML = `
-          <div class="w-28 h-10 flex items-center justify-center bg-muted/20 rounded border border-muted/40">
-            <span class="text-xs text-muted-foreground font-medium">${logo.name}</span>
-          </div>
-        `;
-      }}
-    />
+    <div className="relative w-36 h-14 flex items-center justify-center bg-background/90 backdrop-blur-sm rounded-lg border border-border/40">
+      <img
+        src={`${SUPABASE_STORAGE_URL}/${logo.filename}`}
+        alt={`${logo.name} logo`}
+        className={`max-w-32 max-h-10 object-contain filter hover:brightness-110 transition-all duration-300 ${className}`}
+        loading="lazy"
+        onError={(e) => {
+          // Fallback to a placeholder if image fails to load
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          target.parentElement!.innerHTML = `
+            <div class="w-36 h-14 flex items-center justify-center bg-background/90 rounded-lg border border-border/40">
+              <span class="text-sm text-foreground/80 font-medium">${logo.name}</span>
+            </div>
+          `;
+        }}
+      />
+    </div>
   );
 };
 
@@ -74,8 +76,8 @@ export const ClientLogoSlider = () => {
         <div className="relative">
           {/* First row - left to right */}
           <div className="flex overflow-hidden mb-4 lg:mb-6 relative" style={{
-            WebkitMask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-            mask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
+            WebkitMask: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+            mask: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
           }}>
             <motion.div
               className="flex gap-8 items-center"
@@ -95,12 +97,10 @@ export const ClientLogoSlider = () => {
                   whileHover={{ scale: 1.05 }}
                   title={logo.name}
                 >
-                  <div className="glass-card p-4 rounded-xl transition-all duration-300 group-hover:shadow-primary/20">
-                    <ClientLogo 
-                      logo={logo} 
-                      className="group-hover:scale-105 transition-transform duration-300" 
-                    />
-                  </div>
+                  <ClientLogo 
+                    logo={logo} 
+                    className="group-hover:scale-105 transition-transform duration-300" 
+                  />
                 </motion.div>
               ))}
             </motion.div>
@@ -108,8 +108,8 @@ export const ClientLogoSlider = () => {
 
           {/* Second row - right to left */}
           <div className="flex overflow-hidden relative" style={{
-            WebkitMask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-            mask: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)'
+            WebkitMask: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)',
+            mask: 'linear-gradient(to right, transparent, black 5%, black 95%, transparent)'
           }}>
             <motion.div
               className="flex gap-8 items-center"
@@ -129,12 +129,10 @@ export const ClientLogoSlider = () => {
                   whileHover={{ scale: 1.05 }}
                   title={logo.name}
                 >
-                  <div className="glass-card p-4 rounded-xl transition-all duration-300 group-hover:shadow-primary/20">
-                    <ClientLogo 
-                      logo={logo} 
-                      className="group-hover:scale-105 transition-transform duration-300" 
-                    />
-                  </div>
+                  <ClientLogo 
+                    logo={logo} 
+                    className="group-hover:scale-105 transition-transform duration-300" 
+                  />
                 </motion.div>
               ))}
             </motion.div>
