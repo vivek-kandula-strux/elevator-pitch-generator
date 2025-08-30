@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, CheckCircle, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -11,6 +11,7 @@ import { serviceCategories } from '../data/serviceCategories';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
 import { useGTMTracking } from '../hooks/useGTMTracking';
+import { useDebouncedInput } from '../hooks/useDebounce';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -18,21 +19,38 @@ interface RequirementFormProps {
   preSelectedService?: string;
 }
 
-export const RequirementForm = ({ isOpen, onClose, preSelectedService }: RequirementFormProps) => {
+const RequirementForm = React.memo(({ isOpen, onClose, preSelectedService }: RequirementFormProps) => {
   const { toast } = useToast();
   const { trackFormStart, trackFormSubmission, trackRequirementSubmission, trackFormError } = useGTMTracking();
   
-  const [formData, setFormData] = useState<RequirementFormData>({
-    name: '',
-    email: '',
-    company: '',
-    whatsapp: '',
-    serviceType: preSelectedService || '',
-    message: ''
-  });
+  // Debounced inputs for better performance
+  const nameInput = useDebouncedInput('', 300);
+  const emailInput = useDebouncedInput('', 300);
+  const companyInput = useDebouncedInput('', 300);
+  const whatsappInput = useDebouncedInput('', 300);
+  const messageInput = useDebouncedInput('', 300);
+  
+  const [serviceType, setServiceType] = useState(preSelectedService || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Partial<RequirementFormData>>({});
+
+  // Memoize form data object to prevent unnecessary re-renders
+  const formData = useMemo(() => ({
+    name: nameInput.debouncedValue,
+    email: emailInput.debouncedValue,
+    company: companyInput.debouncedValue,
+    whatsapp: whatsappInput.debouncedValue,
+    serviceType,
+    message: messageInput.debouncedValue
+  }), [
+    nameInput.debouncedValue,
+    emailInput.debouncedValue,
+    companyInput.debouncedValue,
+    whatsappInput.debouncedValue,
+    serviceType,
+    messageInput.debouncedValue
+  ]);
 
   // Track form start when modal opens
   useEffect(() => {
@@ -41,7 +59,15 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     }
   }, [isOpen, trackFormStart]);
 
-  const validateForm = (): boolean => {
+  // Update service type when preSelectedService changes
+  useEffect(() => {
+    if (preSelectedService) {
+      setServiceType(preSelectedService);
+    }
+  }, [preSelectedService]);
+
+  // Memoized validation function
+  const validateForm = useCallback((): boolean => {
     const newErrors: Partial<RequirementFormData> = {};
     
     if (!formData.name.trim()) newErrors.name = 'Name is required';
@@ -59,9 +85,10 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Memoized submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -134,14 +161,12 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
       // Reset form after 3 seconds
       setTimeout(() => {
         setIsSubmitted(false);
-        setFormData({ 
-          name: '', 
-          email: '', 
-          company: '',
-          whatsapp: '',
-          serviceType: preSelectedService || '', 
-          message: '' 
-        });
+        nameInput.setValue('');
+        emailInput.setValue('');
+        companyInput.setValue('');
+        whatsappInput.setValue('');
+        messageInput.setValue('');
+        setServiceType(preSelectedService || '');
         onClose();
       }, 3000);
 
@@ -155,23 +180,82 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, validateForm, errors, trackFormSubmission, trackFormError, trackRequirementSubmission, toast, nameInput, emailInput, companyInput, whatsappInput, messageInput, preSelectedService, onClose]);
 
-  const handleClose = () => {
+  // Memoized close handler
+  const handleClose = useCallback(() => {
     if (!isSubmitting) {
-      setFormData({ 
-        name: '', 
-        email: '', 
-        company: '',
-        whatsapp: '',
-        serviceType: preSelectedService || '', 
-        message: '' 
-      });
+      nameInput.setValue('');
+      emailInput.setValue('');
+      companyInput.setValue('');
+      whatsappInput.setValue('');
+      messageInput.setValue('');
+      setServiceType(preSelectedService || '');
       setErrors({});
       setIsSubmitted(false);
       onClose();
     }
-  };
+  }, [isSubmitting, nameInput, emailInput, companyInput, whatsappInput, messageInput, preSelectedService, onClose]);
+
+  // Memoized input change handlers
+  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    nameInput.handleChange(e.target.value);
+    if (errors.name) {
+      setErrors(prev => ({ ...prev, name: undefined }));
+    }
+  }, [nameInput.handleChange, errors.name]);
+
+  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    emailInput.handleChange(e.target.value);
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: undefined }));
+    }
+  }, [emailInput.handleChange, errors.email]);
+
+  const handleCompanyChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    companyInput.handleChange(e.target.value);
+    if (errors.company) {
+      setErrors(prev => ({ ...prev, company: undefined }));
+    }
+  }, [companyInput.handleChange, errors.company]);
+
+  const handleWhatsappChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    whatsappInput.handleChange(e.target.value);
+    if (errors.whatsapp) {
+      setErrors(prev => ({ ...prev, whatsapp: undefined }));
+    }
+  }, [whatsappInput.handleChange, errors.whatsapp]);
+
+  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    messageInput.handleChange(e.target.value);
+    if (errors.message) {
+      setErrors(prev => ({ ...prev, message: undefined }));
+    }
+  }, [messageInput.handleChange, errors.message]);
+
+  const handleServiceTypeChange = useCallback((value: string) => {
+    setServiceType(value);
+    if (errors.serviceType) {
+      setErrors(prev => ({ ...prev, serviceType: undefined }));
+    }
+  }, [errors.serviceType]);
+
+  // Memoized click handlers
+  const handleBackdropClick = useCallback(() => {
+    handleClose();
+  }, [handleClose]);
+
+  const handleModalClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+  }, []);
+
+  // Memoized service options
+  const serviceOptions = useMemo(() => 
+    serviceCategories.map((category) => (
+      <SelectItem key={category.id} value={category.id}>
+        {category.icon} {category.title}
+      </SelectItem>
+    )), []);
 
   return (
     <AnimatePresence>
@@ -181,7 +265,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={handleClose}
+          onClick={handleBackdropClick}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -189,7 +273,7 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleModalClick}
           >
             {/* Close Button */}
             <button
@@ -224,8 +308,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       <Input
                         id="name"
                         type="text"
-                        value={formData.name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        value={nameInput.value}
+                        onChange={handleNameChange}
                         className={errors.name ? 'border-destructive' : ''}
                         placeholder="Your name"
                       />
@@ -243,8 +327,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       <Input
                         id="email"
                         type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                        value={emailInput.value}
+                        onChange={handleEmailChange}
                         className={errors.email ? 'border-destructive' : ''}
                         placeholder="your@email.com"
                       />
@@ -262,8 +346,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       <Input
                         id="company"
                         type="text"
-                        value={formData.company}
-                        onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                        value={companyInput.value}
+                        onChange={handleCompanyChange}
                         className={errors.company ? 'border-destructive' : ''}
                         placeholder="Your company"
                       />
@@ -281,8 +365,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       <Input
                         id="whatsapp"
                         type="tel"
-                        value={formData.whatsapp}
-                        onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))}
+                        value={whatsappInput.value}
+                        onChange={handleWhatsappChange}
                         className={errors.whatsapp ? 'border-destructive' : ''}
                         placeholder="+1 555 123 4567"
                       />
@@ -298,18 +382,14 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                     >
                       <Label htmlFor="serviceType">Service *</Label>
                       <Select
-                        value={formData.serviceType}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, serviceType: value }))}
+                        value={serviceType}
+                        onValueChange={handleServiceTypeChange}
                       >
                         <SelectTrigger className={errors.serviceType ? 'border-destructive' : ''}>
                           <SelectValue placeholder="Select service" />
                         </SelectTrigger>
                         <SelectContent>
-                          {serviceCategories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.icon} {category.title}
-                            </SelectItem>
-                          ))}
+                          {serviceOptions}
                         </SelectContent>
                       </Select>
                       {errors.serviceType && (
@@ -325,8 +405,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
                       <Label htmlFor="message">Requirements *</Label>
                       <Textarea
                         id="message"
-                        value={formData.message}
-                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                        value={messageInput.value}
+                        onChange={handleMessageChange}
                         className={errors.message ? 'border-destructive' : ''}
                         placeholder="Describe your project needs..."
                         rows={3}
@@ -379,4 +459,8 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
       )}
     </AnimatePresence>
   );
-};
+});
+
+RequirementForm.displayName = 'RequirementForm';
+
+export { RequirementForm };
