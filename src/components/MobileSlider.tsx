@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
 
@@ -106,75 +106,55 @@ export function MobileSlider() {
     : 0;
 
   return (
-    <div className="block md:hidden bg-card/50 backdrop-blur-sm border border-card-border rounded-2xl p-6 mx-4 mb-8">
+    <div className="block md:hidden px-6 py-12">
       {/* Header */}
-      <div className="text-center mb-6">
-        <div className="flex justify-center mb-3">
-          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-primary-foreground" />
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-semibold text-foreground mb-3">
           Do you need help marketing your business?
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground/80 text-sm">
           Slide to explore our marketing services
         </p>
       </div>
 
-      {/* iOS-style Slider */}
-      <div className="relative">
+      {/* Clean iOS-style Slider */}
+      <div className="relative max-w-sm mx-auto">
         <div
           ref={sliderRef}
-          className="relative h-16 bg-muted/30 rounded-full border-2 border-muted/50 overflow-hidden select-none"
+          className="relative h-[60px] bg-muted/20 rounded-full overflow-hidden select-none border border-border/20"
         >
           {/* Progress Background */}
           <div 
-            className="absolute inset-0 bg-gradient-primary/20 transition-all duration-200 ease-out rounded-full"
+            className="absolute inset-0 bg-primary/10 transition-all duration-200 ease-out rounded-full"
             style={{ 
-              width: `${Math.max(progressPercentage, 15)}%`,
-              opacity: isSliding ? 0.6 : 0.3
+              width: `${Math.max(progressPercentage, 0)}%`,
             }}
           />
           
           {/* Slide Text */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className={`text-sm font-medium transition-opacity duration-200 ${
-              progressPercentage > 50 ? 'opacity-0' : 'opacity-100'
-            } ${isCompleted ? 'text-primary' : 'text-muted-foreground'}`}>
-              {isCompleted ? 'Opening Services...' : 'Slide to explore services'}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none pr-16">
+            <span className={`text-sm font-medium transition-all duration-300 ${
+              progressPercentage > 40 ? 'opacity-0 translate-x-2' : 'opacity-100 translate-x-0'
+            } ${isCompleted ? 'text-primary' : 'text-muted-foreground/70'}`}>
+              {isCompleted ? 'Opening Services...' : 'Slide to explore'}
             </span>
-          </div>
-          
-          {/* Animated Arrow Hints */}
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex space-x-1 pointer-events-none">
-            {[0, 1, 2].map((i) => (
-              <ChevronRight
-                key={i}
-                className={`w-4 h-4 text-muted-foreground/60 animate-pulse`}
-                style={{ 
-                  animationDelay: `${i * 150}ms`,
-                  opacity: progressPercentage > 30 ? 0 : 1
-                }}
-              />
-            ))}
           </div>
 
           {/* Slider Thumb */}
           <div
             ref={thumbRef}
-            className={`absolute left-1 top-1 w-14 h-14 bg-gradient-primary rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform duration-200 ${
-              isSliding ? 'scale-110' : 'scale-100'
+            className={`absolute left-0 top-0 w-[60px] h-[60px] bg-primary rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-200 ${
+              isSliding ? 'scale-105' : 'scale-100'
             } ${isCompleted ? 'bg-green-500' : ''}`}
             style={{ 
-              transform: `translateX(${slideOffset}px) ${isSliding ? 'scale(1.1)' : 'scale(1)'}`,
-              transition: isSliding ? 'none' : 'transform 0.3s ease-out'
+              transform: `translateX(${slideOffset}px) ${isSliding ? 'scale(1.05)' : 'scale(1)'}`,
+              transition: isSliding ? 'none' : 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
             onMouseDown={handleStart}
             onTouchStart={handleStart}
           >
             {isCompleted ? (
-              <div className="w-5 h-5 border-2 border-white rounded-full bg-white/20 animate-spin" />
+              <div className="w-5 h-5 border-2 border-primary-foreground rounded-full border-t-transparent animate-spin" />
             ) : (
               <ChevronRight className="w-6 h-6 text-primary-foreground" />
             )}
@@ -182,12 +162,12 @@ export function MobileSlider() {
         </div>
 
         {/* Helper Text */}
-        <div className="text-center mt-3">
-          <p className="text-xs text-muted-foreground">
+        <div className="text-center mt-4">
+          <p className="text-xs text-muted-foreground/60">
             {isCompleted 
-              ? 'Redirecting to services...' 
+              ? 'Taking you to our services...' 
               : progressPercentage > 50 
-                ? 'Keep sliding!' 
+                ? 'Almost there!' 
                 : 'Swipe right to continue'
             }
           </p>
