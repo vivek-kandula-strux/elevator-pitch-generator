@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { GTMProvider } from "@/contexts/GTMContext";
+import { FloatingWidget } from "@/components/FloatingWidget";
 import FormPage from "./pages/FormPage";
 import ResultsPage from "./pages/ResultsPage";
 import ServicesPage from "./pages/ServicesPage";
@@ -29,6 +30,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <FloatingWidget />
           </GTMProvider>
         </BrowserRouter>
       </TooltipProvider>
