@@ -2,14 +2,21 @@ import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useGTMTracking } from '@/hooks/useGTMTracking';
 import Logo from '@/components/Logo';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { trackNavigation, trackButtonClick } = useGTMTracking();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    trackButtonClick(isMobileMenuOpen ? 'Close menu' : 'Open menu', 'mobile-menu-toggle');
+  };
+
+  const handleNavClick = (destination: string) => {
+    trackNavigation(destination, 'header_navigation');
   };
 
   return (
@@ -32,6 +39,7 @@ const Header = () => {
                   ? 'text-primary font-semibold' 
                   : 'text-foreground/80 hover:text-foreground'
               }`}
+              onClick={() => handleNavClick('/')}
             >
               30 Second Generator
             </Link>
@@ -42,6 +50,7 @@ const Header = () => {
                   ? 'text-primary font-semibold' 
                   : 'text-foreground/80 hover:text-foreground'
               }`}
+              onClick={() => handleNavClick('/services')}
             >
               Our Services
             </Link>
@@ -52,6 +61,7 @@ const Header = () => {
                   ? 'text-primary font-semibold' 
                   : 'text-foreground/80 hover:text-foreground'
               }`}
+              onClick={() => handleNavClick('/contact')}
             >
               Contact Us
             </Link>

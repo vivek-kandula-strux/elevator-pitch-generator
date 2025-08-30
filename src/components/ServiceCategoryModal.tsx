@@ -1,7 +1,9 @@
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, ArrowRight } from 'lucide-react';
 import { ServiceCategory } from '../types/services';
 import { Button } from './ui/button';
+import { useGTMTracking } from '../hooks/useGTMTracking';
 
 interface ServiceCategoryModalProps {
   category: ServiceCategory | null;
@@ -11,7 +13,31 @@ interface ServiceCategoryModalProps {
 }
 
 export const ServiceCategoryModal = ({ category, isOpen, onClose, onRequirementClick }: ServiceCategoryModalProps) => {
+  const { trackModalOpen, trackButtonClick, trackServiceSelection } = useGTMTracking();
+  
   if (!category) return null;
+
+  const handleModalOpen = () => {
+    trackModalOpen('service_category');
+    trackServiceSelection(category.id, category.title);
+  };
+
+  const handleRequirementClick = () => {
+    trackButtonClick('Discuss Your Requirements', 'service-requirement-cta');
+    onRequirementClick();
+  };
+
+  const handleClose = () => {
+    trackButtonClick('Close modal', 'service-modal-close');
+    onClose();
+  };
+
+  // Track modal open when it opens
+  React.useEffect(() => {
+    if (isOpen && category) {
+      handleModalOpen();
+    }
+  }, [isOpen, category]);
 
   return (
     <AnimatePresence>
@@ -21,7 +47,7 @@ export const ServiceCategoryModal = ({ category, isOpen, onClose, onRequirementC
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={onClose}
+          onClick={handleClose}
         >
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -42,7 +68,7 @@ export const ServiceCategoryModal = ({ category, isOpen, onClose, onRequirementC
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={onClose}
+          onClick={handleClose}
                   className="text-white hover:bg-white/10 -mr-2 -mt-2"
                 >
                   <X className="w-5 h-5" />
@@ -118,7 +144,7 @@ export const ServiceCategoryModal = ({ category, isOpen, onClose, onRequirementC
               {/* CTA */}
               <div className="flex justify-center">
                 <Button
-                  onClick={onRequirementClick}
+                  onClick={handleRequirementClick}
                   size="lg"
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
                 >

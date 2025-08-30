@@ -4,6 +4,7 @@ import BusinessForm from '@/components/BusinessForm';
 import Header from '@/components/Header';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useGTMTracking } from '@/hooks/useGTMTracking';
 
 interface FormData {
   name: string;
@@ -18,6 +19,7 @@ const FormPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { trackPitchGeneration } = useGTMTracking();
 
   const handleFormSubmit = async (data: FormData) => {
     setIsLoading(true);
@@ -30,6 +32,9 @@ const FormPage = () => {
       if (error) {
         throw error;
       }
+
+      // Track successful pitch generation
+      trackPitchGeneration(data.company, data.category, result.recordId);
 
       // Navigate to results page with the record ID and access token
       navigate(`/results/${result.recordId}?token=${result.accessToken}`, {

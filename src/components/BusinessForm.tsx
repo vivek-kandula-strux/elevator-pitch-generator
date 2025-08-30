@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useGTMTracking } from '@/hooks/useGTMTracking';
 interface FormData {
   name: string;
   whatsapp: string;
@@ -25,9 +26,13 @@ export default function BusinessForm({
     specificAsk: ''
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  const { trackFormStart, trackFormStep, trackFormError, trackFormSubmission } = useGTMTracking();
+
+  // Track form start when component mounts
+  useEffect(() => {
+    trackFormStart('business_form');
+  }, [trackFormStart]);
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
     if (!formData.name.trim()) {
@@ -56,8 +61,15 @@ export default function BusinessForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+      trackFormSubmission('business_form', {
+        company: formData.company,
+        category: formData.category,
+        form_step: 'completed'
+      });
       onSubmit(formData);
     } else {
+      const errorFields = Object.keys(errors).join(', ');
+      trackFormError('business_form', `Validation failed: ${errorFields}`);
       toast({
         variant: "destructive",
         title: "Please fix the errors",
@@ -70,6 +82,16 @@ export default function BusinessForm({
       ...prev,
       [field]: value
     }));
+    
+    // Track form progress
+    if (field === 'company' && value.length > 2) {
+      trackFormStep('business_form', 'company_entered');
+    } else if (field === 'category' && value.length > 2) {
+      trackFormStep('business_form', 'category_entered');
+    } else if (field === 'usp' && value.length > 10) {
+      trackFormStep('business_form', 'usp_entered');
+    }
+    
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({

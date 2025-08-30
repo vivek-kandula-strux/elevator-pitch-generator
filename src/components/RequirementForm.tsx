@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, CheckCircle, Phone } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -10,6 +10,7 @@ import { RequirementFormData } from '../types/services';
 import { serviceCategories } from '../data/serviceCategories';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
+import { useGTMTracking } from '../hooks/useGTMTracking';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ interface RequirementFormProps {
 
 export const RequirementForm = ({ isOpen, onClose, preSelectedService }: RequirementFormProps) => {
   const { toast } = useToast();
+  const { trackFormStart, trackFormSubmission, trackRequirementSubmission, trackFormError } = useGTMTracking();
+  
   const [formData, setFormData] = useState<RequirementFormData>({
     name: '',
     email: '',
@@ -30,6 +33,13 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Partial<RequirementFormData>>({});
+
+  // Track form start when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      trackFormStart('requirement_form');
+    }
+  }, [isOpen, trackFormStart]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<RequirementFormData> = {};
@@ -54,11 +64,22 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      const errorFields = Object.keys(errors).join(', ');
+      trackFormError('requirement_form', `Validation failed: ${errorFields}`);
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
+      // Track form submission
+      trackFormSubmission('requirement_form', {
+        service_category: formData.serviceType,
+        company: formData.company,
+        form_step: 'completed'
+      });
+
       // Store data in requirements table
       const { error } = await supabase
         .from('requirements')
@@ -99,6 +120,9 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
         console.error('Email notification failed:', emailError);
         // Don't fail the whole submission if email fails
       }
+
+      // Track successful requirement submission
+      trackRequirementSubmission(formData.serviceType);
 
       toast({
         title: "Requirement submitted successfully!",
