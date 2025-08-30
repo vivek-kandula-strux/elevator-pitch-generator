@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import GenerationResults from '@/components/GenerationResults';
+import { MobileSlider } from '@/components/MobileSlider';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -136,6 +137,9 @@ const ResultsPage = () => {
           generationData={generationData}
           onStartOver={handleStartOver}
         />
+        
+        {/* Mobile Marketing Slider */}
+        <MobileSlider />
       </div>
     </div>
   );

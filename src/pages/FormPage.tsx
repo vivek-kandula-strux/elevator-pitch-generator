@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BusinessForm from '@/components/BusinessForm';
 import Header from '@/components/Header';
+import { MobileSlider } from '@/components/MobileSlider';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
@@ -73,6 +74,9 @@ const FormPage = () => {
             onSubmit={handleFormSubmit}
             isLoading={isLoading}
           />
+          
+          {/* Mobile Marketing Slider */}
+          <MobileSlider />
         </div>
       </div>
     </div>
