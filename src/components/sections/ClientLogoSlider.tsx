@@ -1,4 +1,3 @@
-import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 // Client logos with actual storage paths
@@ -22,19 +21,8 @@ const clientLogos = [
 
 const SUPABASE_STORAGE_URL = "https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Client%20Logos";
 
-// Memoized client logo image component with error handling
-const ClientLogo = React.memo(({ logo, className }: { logo: { name: string; filename: string }; className?: string }) => {
-  const handleImageError = React.useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    // Fallback to a placeholder if image fails to load
-    const target = e.target as HTMLImageElement;
-    target.style.display = 'none';
-    target.parentElement!.innerHTML = `
-      <div class="w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm">
-        <span class="text-sm text-slate-700 font-medium">${logo.name}</span>
-      </div>
-    `;
-  }, [logo.name]);
-
+// Client logo image component with error handling
+const ClientLogo = ({ logo, className }: { logo: { name: string; filename: string }; className?: string }) => {
   return (
     <div className="relative w-36 h-14 flex items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg border border-slate-200/60 shadow-sm">
       <img
@@ -42,51 +30,25 @@ const ClientLogo = React.memo(({ logo, className }: { logo: { name: string; file
         alt={`${logo.name} logo`}
         className={`max-w-32 max-h-10 object-contain hover:brightness-110 transition-all duration-300 ${className}`}
         loading="lazy"
-        onError={handleImageError}
+        onError={(e) => {
+          // Fallback to a placeholder if image fails to load
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+          target.parentElement!.innerHTML = `
+            <div class="w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm">
+              <span class="text-sm text-slate-700 font-medium">${logo.name}</span>
+            </div>
+          `;
+        }}
       />
     </div>
   );
-});
+};
 
-ClientLogo.displayName = 'ClientLogo';
-
-export const ClientLogoSlider = React.memo(() => {
-  // Memoize duplicated arrays for infinite scroll effect
-  const { firstRowLogos, secondRowLogos } = useMemo(() => ({
-    firstRowLogos: [...clientLogos.slice(0, 8), ...clientLogos.slice(0, 8)],
-    secondRowLogos: [...clientLogos.slice(8), ...clientLogos.slice(8)]
-  }), []);
-
-  // Memoized logo components to prevent unnecessary re-renders
-  const firstRowComponents = useMemo(() => 
-    firstRowLogos.map((logo, index) => (
-      <motion.div
-        key={`${logo.id}-${index}`}
-        className="flex-shrink-0 group cursor-pointer"
-        whileHover={{ scale: 1.05 }}
-        title={logo.name}
-      >
-        <ClientLogo 
-          logo={logo} 
-          className="group-hover:scale-105 transition-transform duration-300" 
-        />
-      </motion.div>
-    )), [firstRowLogos]);
-
-  const secondRowComponents = useMemo(() => 
-    secondRowLogos.map((logo, index) => (
-      <motion.div
-        key={`${logo.id}-${index}`}
-        className="flex-shrink-0 group cursor-pointer"
-        whileHover={{ scale: 1.05 }}
-        title={logo.name}
-      >
-        <ClientLogo 
-          logo={logo} 
-          className="group-hover:scale-105 transition-transform duration-300" 
-        />
-      </motion.div>
-    )), [secondRowLogos]);
+export const ClientLogoSlider = () => {
+  // Create duplicated arrays for infinite scroll effect
+  const firstRowLogos = [...clientLogos.slice(0, 8), ...clientLogos.slice(0, 8)];
+  const secondRowLogos = [...clientLogos.slice(8), ...clientLogos.slice(8)];
 
   return (
     <section className="py-12 lg:py-16 bg-muted/30 relative overflow-hidden border-t border-b border-muted/20">
@@ -128,7 +90,19 @@ export const ClientLogoSlider = React.memo(() => {
                 repeat: Infinity
               }}
             >
-              {firstRowComponents}
+              {firstRowLogos.map((logo, index) => (
+                <motion.div
+                  key={`${logo.id}-${index}`}
+                  className="flex-shrink-0 group cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  title={logo.name}
+                >
+                  <ClientLogo 
+                    logo={logo} 
+                    className="group-hover:scale-105 transition-transform duration-300" 
+                  />
+                </motion.div>
+              ))}
             </motion.div>
           </div>
 
@@ -148,7 +122,19 @@ export const ClientLogoSlider = React.memo(() => {
                 repeat: Infinity
               }}
             >
-              {secondRowComponents}
+              {secondRowLogos.map((logo, index) => (
+                <motion.div
+                  key={`${logo.id}-${index}`}
+                  className="flex-shrink-0 group cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  title={logo.name}
+                >
+                  <ClientLogo 
+                    logo={logo} 
+                    className="group-hover:scale-105 transition-transform duration-300" 
+                  />
+                </motion.div>
+              ))}
             </motion.div>
           </div>
         </div>
@@ -156,6 +142,4 @@ export const ClientLogoSlider = React.memo(() => {
       </div>
     </section>
   );
-});
-
-ClientLogoSlider.displayName = 'ClientLogoSlider';
+};

@@ -1,31 +1,23 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 
 interface LogoProps {
   className?: string;
   onClick?: () => void;
 }
 
-const Logo = React.memo(({ className = "", onClick }: LogoProps) => {
-  const handleClick = useCallback(() => {
+const Logo = ({ className = "", onClick }: LogoProps) => {
+  const handleClick = () => {
     if (onClick) {
       onClick();
     } else {
       window.location.href = '/';
     }
-  }, [onClick]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleClick();
-    }
-  }, [handleClick]);
+  };
 
   return (
     <div 
       className={`flex items-center space-x-2 sm:space-x-3 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg p-1 -m-1 ${className}`}
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-label="Navigate to home page"
@@ -36,7 +28,6 @@ const Logo = React.memo(({ className = "", onClick }: LogoProps) => {
           src="https://sgggqrcwfcbtyianduyo.supabase.co/storage/v1/object/public/Branding/Skill%20Nerchuko%20.png"
           alt="Strux Digital Logo"
           className="h-8 sm:h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-lg"
-          loading="lazy"
         />
         <div className="absolute inset-0 rounded-lg bg-gradient-primary opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm" />
       </div>
@@ -56,8 +47,6 @@ const Logo = React.memo(({ className = "", onClick }: LogoProps) => {
       </div>
     </div>
   );
-});
-
-Logo.displayName = 'Logo';
+};
 
 export default Logo;
