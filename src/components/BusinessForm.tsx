@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
+import { useDebounce } from '@/hooks/useDebounce';
 interface FormData {
   name: string;
   whatsapp: string;
@@ -13,7 +14,7 @@ interface BusinessFormProps {
   onSubmit: (data: FormData) => void;
   isLoading: boolean;
 }
-export default function BusinessForm({
+const BusinessForm = React.memo(function BusinessForm({
   onSubmit,
   isLoading
 }: BusinessFormProps) {
@@ -29,11 +30,15 @@ export default function BusinessForm({
   const { toast } = useToast();
   const { trackFormStart, trackFormStep, trackFormError, trackFormSubmission } = useGTMTracking();
 
+  // Debounced form data for validation
+  const debouncedFormData = useDebounce(formData, 300);
+
   // Track form start when component mounts
   useEffect(() => {
     trackFormStart('business_form');
   }, [trackFormStart]);
-  const validateForm = (): boolean => {
+
+  const validateForm = useCallback((): boolean => {
     const newErrors: Partial<FormData> = {};
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -57,8 +62,8 @@ export default function BusinessForm({
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-  const handleSubmit = (e: React.FormEvent) => {
+  }, [formData]);
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       trackFormSubmission('business_form', {
@@ -76,8 +81,8 @@ export default function BusinessForm({
         description: "Some required fields are missing or invalid."
       });
     }
-  };
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  }, [validateForm, trackFormSubmission, formData, errors, trackFormError, toast, onSubmit]);
+  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -92,14 +97,17 @@ export default function BusinessForm({
       trackFormStep('business_form', 'usp_entered');
     }
     
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
-    }
-  };
+    // Clear error when user starts typing using functional update
+    setErrors(prev => {
+      if (prev[field]) {
+        return {
+          ...prev,
+          [field]: ''
+        };
+      }
+      return prev;
+    });
+  }, [trackFormStep]);
   return <div className="form-card p-4 md:p-6 lg:p-10 max-w-3xl mx-auto animate-fade-in">
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-3 mb-6">
@@ -224,4 +232,6 @@ export default function BusinessForm({
         </p>
       </div>
     </div>;
-}
+});
+
+export default BusinessForm;

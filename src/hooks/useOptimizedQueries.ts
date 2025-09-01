@@ -220,26 +220,94 @@ export const useDataPrefetching = () => {
   }, [queryClient]);
 };
 
-// Background sync hook for keeping data fresh
+// Smart background sync hook with page visibility and idle detection
 export const useBackgroundSync = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Background refresh of critical data every 2 minutes
-      queryClient.invalidateQueries({ 
-        queryKey: ['elevator_pitches'], 
-        refetchType: 'active' 
-      });
-      
-      // Refresh requirements every minute
-      queryClient.invalidateQueries({ 
-        queryKey: ['requirements'], 
-        refetchType: 'active' 
-      });
-    }, 2 * 60 * 1000); // 2 minutes
+    let isIdle = false;
+    let idleTimer: NodeJS.Timeout;
+    let syncInterval: NodeJS.Timeout;
+    let isPageVisible = !document.hidden;
 
-    return () => clearInterval(interval);
+    // Reset idle timer on user activity
+    const resetIdleTimer = () => {
+      isIdle = false;
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        isIdle = true;
+        console.log('📱 User idle detected - reducing sync frequency');
+      }, 5 * 60 * 1000); // 5 minutes idle threshold
+    };
+
+    // Track page visibility
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) {
+        console.log('👁️ Page visible - resuming normal sync');
+        resetIdleTimer();
+        // Immediate sync when page becomes visible
+        queryClient.invalidateQueries({ 
+          queryKey: ['elevator_pitches'], 
+          refetchType: 'active' 
+        });
+      } else {
+        console.log('🙈 Page hidden - reducing sync frequency');
+        clearTimeout(idleTimer);
+      }
+    };
+
+    // Track user activity
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    const handleUserActivity = () => {
+      if (isPageVisible) {
+        resetIdleTimer();
+      }
+    };
+
+    // Smart sync logic
+    const performSync = () => {
+      // Only sync if page is visible and user is not idle
+      if (isPageVisible && !isIdle) {
+        queryClient.invalidateQueries({ 
+          queryKey: ['elevator_pitches'], 
+          refetchType: 'active' 
+        });
+        
+        queryClient.invalidateQueries({ 
+          queryKey: ['requirements'], 
+          refetchType: 'active' 
+        });
+      }
+    };
+
+    // Set up event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleUserActivity, true);
+    });
+
+    // Start sync interval - more frequent when active, less when idle
+    const startSyncInterval = () => {
+      syncInterval = setInterval(() => {
+        const interval = isIdle || !isPageVisible ? 10 * 60 * 1000 : 2 * 60 * 1000; // 10min idle, 2min active
+        performSync();
+      }, 2 * 60 * 1000); // Check every 2 minutes
+    };
+
+    // Initialize
+    resetIdleTimer();
+    startSyncInterval();
+
+    // Cleanup
+    return () => {
+      clearTimeout(idleTimer);
+      clearInterval(syncInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleUserActivity, true);
+      });
+    };
   }, [queryClient]);
 };
 
