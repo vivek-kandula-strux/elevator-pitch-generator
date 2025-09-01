@@ -41,6 +41,16 @@ export const useAsyncElevatorPitch = () => {
         status: 'processing'
       }));
 
+      // Trigger job processor immediately
+      try {
+        await fetch('https://sgggqrcwfcbtyianduyo.supabase.co/functions/v1/trigger-job-processor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.log('Job processor trigger failed:', error);
+      }
+
       // Start polling for completion
       pollForCompletion(data.recordId, data.accessToken);
 
