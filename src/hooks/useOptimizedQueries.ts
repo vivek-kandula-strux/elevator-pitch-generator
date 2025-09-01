@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Query Keys for better cache management and deduplication
@@ -220,101 +220,27 @@ export const useDataPrefetching = () => {
   }, [queryClient]);
 };
 
-// Smart background sync hook with page visibility and idle detection
+// Background sync hook for keeping data fresh
 export const useBackgroundSync = () => {
   const queryClient = useQueryClient();
-  const [isVisible, setIsVisible] = useState(!document.hidden);
-  const [lastActivity, setLastActivity] = useState(Date.now());
-  const [isIdle, setIsIdle] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout>();
 
-  // Track page visibility
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const visible = !document.hidden;
-      setIsVisible(visible);
-      
-      if (visible) {
-        setLastActivity(Date.now());
-        setIsIdle(false);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  // Track user activity
-  useEffect(() => {
-    const updateActivity = () => {
-      setLastActivity(Date.now());
-      setIsIdle(false);
-    };
-
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    events.forEach(event => {
-      document.addEventListener(event, updateActivity, { passive: true });
-    });
-
-    return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, updateActivity);
-      });
-    };
-  }, []);
-
-  // Monitor idle state
-  useEffect(() => {
-    const checkIdle = () => {
-      const now = Date.now();
-      const idleTime = now - lastActivity;
-      const isCurrentlyIdle = idleTime > 5 * 60 * 1000; // 5 minutes
-      
-      if (isCurrentlyIdle !== isIdle) {
-        setIsIdle(isCurrentlyIdle);
-      }
-    };
-
-    const idleCheckInterval = setInterval(checkIdle, 30000); // Check every 30 seconds
-    return () => clearInterval(idleCheckInterval);
-  }, [lastActivity, isIdle]);
-
-  // Smart background sync with reduced frequency
-  useEffect(() => {
-    const performSync = () => {
-      if (!isVisible || isIdle) {
-        return; // Don't sync when page is hidden or user is idle
-      }
-
-      // Only invalidate the most critical queries
+    const interval = setInterval(() => {
+      // Background refresh of critical data every 2 minutes
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.elevatorPitches.recent(5), // Use correct key
-        refetchType: 'none' // Don't auto-refetch, just mark stale
+        queryKey: ['elevator_pitches'], 
+        refetchType: 'active' 
       });
-    };
+      
+      // Refresh requirements every minute
+      queryClient.invalidateQueries({ 
+        queryKey: ['requirements'], 
+        refetchType: 'active' 
+      });
+    }, 2 * 60 * 1000); // 2 minutes
 
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    if (isVisible && !isIdle) {
-      // Sync every 2 minutes when active (reduced from 30 seconds)
-      intervalRef.current = setInterval(performSync, 2 * 60 * 1000);
-    } else if (isVisible && isIdle) {
-      // Sync every 10 minutes when visible but idle (reduced frequency)
-      intervalRef.current = setInterval(performSync, 10 * 60 * 1000);
-    }
-    // No sync when page is hidden
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isVisible, isIdle, queryClient]);
-
-  return { isVisible, isIdle, lastActivity };
+    return () => clearInterval(interval);
+  }, [queryClient]);
 };
 
 // Performance monitoring for queries

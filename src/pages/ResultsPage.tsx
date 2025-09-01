@@ -3,7 +3,6 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { GenerationResultsWithSuspense } from '@/components/lazy/LazyComponents';
 import { useElevatorPitchByToken } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
-import { useAsyncElevatorPitch } from '@/hooks/useAsyncElevatorPitch';
 
 // Lazy load MobileSlider since it contains animations
 const LazyMobileSlider = React.lazy(() => 
@@ -35,10 +34,6 @@ const ResultsPage = () => {
   
   const [formData, setFormData] = useState<FormData | null>(null);
   const [generationData, setGenerationData] = useState<GenerationData | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  // Use async pitch status checking
-  const asyncPitch = useAsyncElevatorPitch();
 
   // Use optimized query with caching
   const { data: pitchData, isLoading, error } = useElevatorPitchByToken(
@@ -51,19 +46,9 @@ const ResultsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Check if data was passed via navigation state
-    if (location.state?.formData) {
+    if (location.state?.generationData && location.state?.formData) {
+      setGenerationData(location.state.generationData);
       setFormData(location.state.formData);
-      
-      // If status is processing, start polling
-      if (location.state?.status === 'processing') {
-        setIsProcessing(true);
-        // Start checking for completion
-        if (recordId && accessToken) {
-          checkPitchStatus();
-        }
-      } else if (location.state?.generationData) {
-        setGenerationData(location.state.generationData);
-      }
     } else if (pitchData) {
       // Use data from optimized query (type assertion for JSON response)
       const pitchDataTyped = pitchData as any;
@@ -84,71 +69,11 @@ const ResultsPage = () => {
 
       setFormData(formData);
       setGenerationData(generationData);
-      setIsProcessing(false);
     } else if (!recordId) {
       // No recordId, redirect to form
       navigate('/');
     }
   }, [recordId, location.state, navigate, pitchData]);
-
-  const checkPitchStatus = async () => {
-    if (!recordId || !accessToken) return;
-
-    const checkStatus = async () => {
-      try {
-        const response = await fetch('https://sgggqrcwfcbtyianduyo.supabase.co/functions/v1/check-pitch-status', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ recordId, accessToken })
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'completed' && data.generatedPitch) {
-          const generationData = {
-            ...formData!,
-            generatedPitch: data.generatedPitch,
-            recordId: recordId
-          };
-          setGenerationData(generationData);
-          setIsProcessing(false);
-          return;
-        }
-
-        if (data.status === 'failed') {
-          toast({
-            variant: "destructive",
-            title: "Generation Failed",
-            description: data.errorMessage || "Failed to generate pitch. Please try again.",
-          });
-          setIsProcessing(false);
-          return;
-        }
-
-        // Continue polling if still processing
-        if (data.status === 'processing' || data.status === 'pending') {
-          setTimeout(checkStatus, 3000);
-        }
-      } catch (error) {
-        console.error('Error checking status:', error);
-        setIsProcessing(false);
-      }
-    };
-
-    // Trigger job processor first, then start checking
-    try {
-      await fetch('https://sgggqrcwfcbtyianduyo.supabase.co/functions/v1/trigger-job-processor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } catch (error) {
-      console.log('Job processor trigger failed:', error);
-    }
-
-    setTimeout(checkStatus, 2000);
-  };
 
   useEffect(() => {
     // Handle query errors
@@ -167,21 +92,14 @@ const ResultsPage = () => {
     navigate('/');
   };
 
-  if (isLoading || isProcessing) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-subtle py-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none"></div>
         <div className="container mx-auto relative z-10 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">
-              {isProcessing ? 'Generating your elevator pitch...' : 'Loading your elevator pitch...'}
-            </p>
-            {isProcessing && (
-              <p className="text-sm text-muted-foreground mt-2">
-                This usually takes 10-30 seconds
-              </p>
-            )}
+            <p className="text-muted-foreground">Loading your elevator pitch...</p>
           </div>
         </div>
       </div>

@@ -31,11 +31,6 @@ const LazyResultsPage = lazy(() => {
   return import("./pages/ResultsPage");
 });
 
-const LazyAuthPage = lazy(() => {
-  logBundleSplit('AuthPage');
-  return import("./pages/AuthPage");
-});
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -95,14 +90,6 @@ const App = () => {
                 element={
                   <Suspense fallback={<PageSkeleton />}>
                     <LazyContactPage />
-                  </Suspense>
-                } 
-              />
-              <Route 
-                path="/auth" 
-                element={
-                  <Suspense fallback={<PageSkeleton />}>
-                    <LazyAuthPage />
                   </Suspense>
                 } 
               />

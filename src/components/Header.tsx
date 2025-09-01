@@ -3,18 +3,12 @@ import { Menu, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
-import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { trackNavigation, trackButtonClick } = useGTMTracking();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -71,18 +65,6 @@ const Header = () => {
             >
               Contact Us
             </Link>
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-foreground/60">
-                  Welcome, {user.email?.split('@')[0]}
-                </span>
-                <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
-              </div>
-            ) : (
-              <Link to="/auth">
-                <Button>Sign In</Button>
-              </Link>
-            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -138,20 +120,6 @@ const Header = () => {
               >
                 Contact Us
               </Link>
-              {user ? (
-                <div className="flex flex-col space-y-2 px-2">
-                  <span className="text-sm text-foreground/60">
-                    Welcome, {user.email?.split('@')[0]}
-                  </span>
-                  <Button variant="outline" onClick={handleSignOut} className="w-fit">
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <Link to="/auth" className="px-2" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button>Sign In</Button>
-                </Link>
-              )}
             </nav>
           </div>
         )}

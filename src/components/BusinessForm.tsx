@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
-import { useDebounce } from '@/hooks/useDebounce';
-import { sanitizeFormData, validatePhone, validateRequired } from '@/utils/inputSanitizer';
 interface FormData {
   name: string;
   whatsapp: string;
@@ -15,7 +13,7 @@ interface BusinessFormProps {
   onSubmit: (data: FormData) => void;
   isLoading: boolean;
 }
-const BusinessForm = React.memo(function BusinessForm({
+export default function BusinessForm({
   onSubmit,
   isLoading
 }: BusinessFormProps) {
@@ -31,51 +29,44 @@ const BusinessForm = React.memo(function BusinessForm({
   const { toast } = useToast();
   const { trackFormStart, trackFormStep, trackFormError, trackFormSubmission } = useGTMTracking();
 
-  // Debounced form data for validation
-  const debouncedFormData = useDebounce(formData, 300);
-
   // Track form start when component mounts
   useEffect(() => {
     trackFormStart('business_form');
   }, [trackFormStart]);
-
-  const validateForm = useCallback((): boolean => {
+  const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
-    if (!validateRequired(formData.name)) {
+    if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
-    if (!validateRequired(formData.whatsapp)) {
+    if (!formData.whatsapp.trim()) {
       newErrors.whatsapp = 'WhatsApp number is required';
-    } else if (!validatePhone(formData.whatsapp)) {
+    } else if (!/^\+?[\d\s-()]+$/.test(formData.whatsapp)) {
       newErrors.whatsapp = 'Please enter a valid phone number';
     }
-    if (!validateRequired(formData.company)) {
+    if (!formData.company.trim()) {
       newErrors.company = 'Company name is required';
     }
     if (!formData.category) {
       newErrors.category = 'Business category is required';
     }
-    if (!validateRequired(formData.usp)) {
+    if (!formData.usp.trim()) {
       newErrors.usp = 'Unique Selling Point is required';
     }
-    if (!validateRequired(formData.specificAsk)) {
+    if (!formData.specificAsk.trim()) {
       newErrors.specificAsk = 'Please describe your target audience and goals';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData]);
-  const handleSubmit = useCallback((e: React.FormEvent) => {
+  };
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Sanitize form data before submission
-      const sanitizedData = sanitizeFormData(formData) as FormData;
-      
       trackFormSubmission('business_form', {
-        company: sanitizedData.company,
-        category: sanitizedData.category,
+        company: formData.company,
+        category: formData.category,
         form_step: 'completed'
       });
-      onSubmit(sanitizedData);
+      onSubmit(formData);
     } else {
       const errorFields = Object.keys(errors).join(', ');
       trackFormError('business_form', `Validation failed: ${errorFields}`);
@@ -85,8 +76,8 @@ const BusinessForm = React.memo(function BusinessForm({
         description: "Some required fields are missing or invalid."
       });
     }
-  }, [validateForm, trackFormSubmission, formData, errors, trackFormError, toast, onSubmit]);
-  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
+  };
+  const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -101,17 +92,14 @@ const BusinessForm = React.memo(function BusinessForm({
       trackFormStep('business_form', 'usp_entered');
     }
     
-    // Clear error when user starts typing using functional update
-    setErrors(prev => {
-      if (prev[field]) {
-        return {
-          ...prev,
-          [field]: ''
-        };
-      }
-      return prev;
-    });
-  }, [trackFormStep]);
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
   return <div className="form-card p-4 md:p-6 lg:p-10 max-w-3xl mx-auto animate-fade-in">
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-3 mb-6">
@@ -236,6 +224,4 @@ const BusinessForm = React.memo(function BusinessForm({
         </p>
       </div>
     </div>;
-});
-
-export default BusinessForm;
+}

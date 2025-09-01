@@ -11,7 +11,6 @@ import { serviceCategories } from '../data/serviceCategories';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
 import { useGTMTracking } from '../hooks/useGTMTracking';
-import { sanitizeFormData, validateEmail, validatePhone, validateRequired } from '../utils/inputSanitizer';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -45,18 +44,18 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
   const validateForm = (): boolean => {
     const newErrors: Partial<RequirementFormData> = {};
     
-    if (!validateRequired(formData.name)) newErrors.name = 'Name is required';
-    if (!validateRequired(formData.email)) newErrors.email = 'Email is required';
-    else if (!validateEmail(formData.email)) {
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    if (!validateRequired(formData.company)) newErrors.company = 'Company is required';
-    if (!validateRequired(formData.whatsapp)) newErrors.whatsapp = 'WhatsApp is required';
-    else if (!validatePhone(formData.whatsapp)) {
+    if (!formData.company.trim()) newErrors.company = 'Company is required';
+    if (!formData.whatsapp.trim()) newErrors.whatsapp = 'WhatsApp is required';
+    else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
       newErrors.whatsapp = 'Please enter a valid WhatsApp number';
     }
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
-    if (!validateRequired(formData.message)) newErrors.message = 'Requirements are required';
+    if (!formData.message.trim()) newErrors.message = 'Requirements are required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -74,26 +73,23 @@ export const RequirementForm = ({ isOpen, onClose, preSelectedService }: Require
     setIsSubmitting(true);
     
     try {
-      // Sanitize form data to prevent XSS
-      const sanitizedData = sanitizeFormData(formData);
-
       // Track form submission
       trackFormSubmission('requirement_form', {
-        service_category: sanitizedData.serviceType,
-        company: sanitizedData.company,
+        service_category: formData.serviceType,
+        company: formData.company,
         form_step: 'completed'
       });
 
-      // Store sanitized data in requirements table
+      // Store data in requirements table
       const { error } = await supabase
         .from('requirements')
         .insert({
-          name: sanitizedData.name,
-          email: sanitizedData.email,
-          company: sanitizedData.company,
-          whatsapp: sanitizedData.whatsapp,
-          service_type: sanitizedData.serviceType,
-          message: sanitizedData.message
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          whatsapp: formData.whatsapp,
+          service_type: formData.serviceType,
+          message: formData.message
         });
 
       if (error) throw error;

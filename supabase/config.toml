@@ -5,9 +5,3 @@ verify_jwt = false
 
 [functions.sync-requirements-to-google-sheets]
 verify_jwt = false
-
-[functions.job-processor]
-verify_jwt = false
-
-[functions.check-pitch-status]
-verify_jwt = false

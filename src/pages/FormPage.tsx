@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import BusinessForm from '@/components/BusinessForm';
 import Header from '@/components/Header';
 import { FormSkeleton } from '@/components/loading/PageSkeleton';
+import { useCreateElevatorPitch } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
-import { useAsyncElevatorPitch } from '@/hooks/useAsyncElevatorPitch';
 
 // Lazy load MobileSlider since it contains animations
 const LazyMobileSlider = React.lazy(() => 
@@ -25,28 +25,34 @@ const FormPage = () => {
   const { toast } = useToast();
   const { trackPitchGeneration } = useGTMTracking();
   
-  // Use async pitch generation with polling
-  const { submitForm, loading, status, recordId, accessToken } = useAsyncElevatorPitch();
+  // Use optimized mutation with caching
+  const createElevatorPitchMutation = useCreateElevatorPitch();
 
   const handleFormSubmit = async (data: FormData) => {
     try {
-      await submitForm(data);
-      
-      // Track pitch generation start
-      trackPitchGeneration(data.company, data.category, recordId || 'pending');
+      const result = await createElevatorPitchMutation.mutateAsync(data);
 
-      // Navigate to results page immediately with processing state
-      if (recordId && accessToken) {
-        navigate(`/results/${recordId}?token=${accessToken}`, {
-          state: {
-            formData: data,
-            status: 'processing'
+      // Track successful pitch generation
+      trackPitchGeneration(data.company, data.category, result.recordId);
+
+      // Navigate to results page with the record ID and access token
+      navigate(`/results/${result.recordId}?token=${result.accessToken}`, {
+        state: {
+          formData: data,
+          generationData: {
+            ...data,
+            generatedPitch: result.generatedPitch,
+            recordId: result.recordId
           }
-        });
-      }
+        }
+      });
     } catch (error) {
-      console.error('Error submitting form:', error);
-      // Error handling is done in the hook
+      console.error('Error generating pitch:', error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Unable to generate your elevator pitch. Please try again.",
+      });
     }
   };
 
@@ -62,7 +68,7 @@ const FormPage = () => {
         <div className="container mx-auto relative z-10">
           <BusinessForm 
             onSubmit={handleFormSubmit}
-            isLoading={loading}
+            isLoading={createElevatorPitchMutation.isPending}
           />
           
           {/* Mobile Marketing Slider */}
