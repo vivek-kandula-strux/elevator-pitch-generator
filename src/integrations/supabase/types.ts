@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      circuit_breaker_state: {
+        Row: {
+          created_at: string
+          failure_count: number
+          failure_threshold: number
+          id: string
+          last_failure_at: string | null
+          last_success_at: string | null
+          recovery_timeout_minutes: number
+          service_name: string
+          state: string
+          success_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          failure_count?: number
+          failure_threshold?: number
+          id?: string
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          recovery_timeout_minutes?: number
+          service_name: string
+          state?: string
+          success_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          failure_count?: number
+          failure_threshold?: number
+          id?: string
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          recovery_timeout_minutes?: number
+          service_name?: string
+          state?: string
+          success_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       elevator_pitches: {
         Row: {
           access_token: string
@@ -53,6 +95,114 @@ export type Database = {
           updated_at?: string
           usp?: string
           whatsapp?: string
+        }
+        Relationships: []
+      }
+      job_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_type: string
+          max_retries: number
+          payload: Json
+          priority: number
+          retry_count: number
+          scheduled_at: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          max_retries?: number
+          payload: Json
+          priority?: number
+          retry_count?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          max_retries?: number
+          payload?: Json
+          priority?: number
+          retry_count?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          id: string
+          metadata: Json | null
+          metric_type: string
+          service_name: string
+          timestamp: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          service_name: string
+          timestamp?: string
+          value: number
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          service_name?: string
+          timestamp?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          max_requests: number
+          request_count: number
+          updated_at: string
+          window_duration_minutes: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          max_requests?: number
+          request_count?: number
+          updated_at?: string
+          window_duration_minutes?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          max_requests?: number
+          request_count?: number
+          updated_at?: string
+          window_duration_minutes?: number
+          window_start?: string
         }
         Relationships: []
       }
@@ -97,6 +247,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_performance_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_elevator_pitch_by_token: {
         Args: { pitch_id: string; provided_token: string }
         Returns: Json
