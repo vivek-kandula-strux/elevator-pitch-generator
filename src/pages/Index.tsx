@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import BusinessForm from '@/components/BusinessForm';
-import GenerationResults from '@/components/GenerationResults';
+import { BusinessFormWithSuspense, GenerationResultsWithSuspense } from '@/components/lazy/OptimizedLazyComponents';
+import { CriticalSection } from '@/components/performance/CriticalLoader';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -80,18 +80,22 @@ const Index = () => {
       
       <div className="container mx-auto relative z-10">
         {currentState === 'form' && (
-          <BusinessForm 
-            onSubmit={handleFormSubmit}
-            isLoading={isLoading}
-          />
+          <CriticalSection>
+            <BusinessFormWithSuspense 
+              onSubmit={handleFormSubmit}
+              isLoading={isLoading}
+            />
+          </CriticalSection>
         )}
         
         {currentState === 'results' && generationData && (
-          <GenerationResults 
-            formData={formData}
-            generationData={generationData}
-            onStartOver={handleStartOver}
-          />
+          <CriticalSection>
+            <GenerationResultsWithSuspense
+              formData={formData}
+              generationData={generationData}
+              onStartOver={handleStartOver}
+            />
+          </CriticalSection>
         )}
       </div>
     </div>

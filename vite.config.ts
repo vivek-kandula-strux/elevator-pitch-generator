@@ -20,18 +20,42 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Optimize bundle splitting for performance
+    // Aggressive bundle splitting for maximum performance
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendor chunks for better caching
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-accordion', '@radix-ui/react-select'],
-          query: ['@tanstack/react-query'],
-          motion: ['framer-motion'],
-          charts: ['recharts'],
-          carousel: ['embla-carousel-react'],
-          calendar: ['react-day-picker'],
+          // Critical vendor chunks
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-router': ['react-router-dom'],
+          'vendor-query': ['@tanstack/react-query'],
+          
+          // UI library chunks
+          'ui-radix': ['@radix-ui/react-dialog', '@radix-ui/react-accordion', '@radix-ui/react-select', '@radix-ui/react-tabs', '@radix-ui/react-tooltip'],
+          'ui-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'ui-theme': ['next-themes'],
+          
+          // Animation and visual chunks
+          'motion': ['framer-motion'],
+          'charts': ['recharts'],
+          'carousel': ['embla-carousel-react'],
+          'calendar': ['react-day-picker', 'date-fns'],
+          'icons': ['lucide-react'],
+          
+          // Utility chunks
+          'utils': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+          'supabase': ['@supabase/supabase-js'],
+          'toast': ['sonner'],
+        },
+        // Optimize chunk naming for caching
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop()?.replace('.tsx', '').replace('.ts', '') : 'chunk';
+          return `js/[name]-[hash:8].js`;
+        },
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return 'css/[name]-[hash:8][extname]';
+          }
+          return 'assets/[name]-[hash:8][extname]';
         },
       },
     },

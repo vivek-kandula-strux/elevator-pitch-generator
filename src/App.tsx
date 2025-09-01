@@ -6,11 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { Suspense, lazy, useEffect } from "react";
 import { GTMProvider } from "@/contexts/GTMContext";
-import { FloatingWidget } from "@/components/FloatingWidget";
 import { PageSkeleton, ServicesSkeleton } from "@/components/loading/PageSkeleton";
 import { measureFCP, estimateBundleImpact, logBundleSplit } from "@/utils/performanceMonitor";
 import { AppOptimizations, PerformanceAnalytics } from "@/components/AppOptimizations";
 import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
+import { ResourcePreloader } from "@/components/performance/ResourcePreloader";
+import { LazyFloatingWidget } from "@/components/lazy/OptimizedLazyComponents";
+import { WebVitalsMonitor } from "@/components/performance/WebVitalsMonitor";
+import { CriticalCSS } from "@/components/performance/CriticalCSS";
 
 // Lazy load ALL pages including FormPage for maximum performance
 const LazyFormPage = lazy(() => {
@@ -65,6 +68,17 @@ const App = () => {
   useEffect(() => {
     measureFCP();
     estimateBundleImpact();
+    
+    // Register service worker for caching
+    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registered:', registration);
+        })
+        .catch(error => {
+          console.log('ServiceWorker registration failed:', error);
+        });
+    }
   }, []);
 
   return (
@@ -76,9 +90,18 @@ const App = () => {
         <BrowserRouter>
           <GTMProvider>
             {/* Performance optimizations */}
+            <CriticalCSS />
             <AppOptimizations />
             <PerformanceAnalytics />
             <PerformanceMonitor />
+            <WebVitalsMonitor />
+            
+            {/* Critical resource preloading */}
+            <ResourcePreloader 
+              preloadImages={[
+                '/src/assets/strux-digital-logo-optimized.webp'
+              ]}
+            />
             
             <Routes>
               <Route 
@@ -117,7 +140,11 @@ const App = () => {
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <FloatingWidget />
+            
+            {/* Lazy load floating widget */}
+            <Suspense fallback={null}>
+              <LazyFloatingWidget />
+            </Suspense>
           </GTMProvider>
         </BrowserRouter>
       </TooltipProvider>
