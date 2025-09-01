@@ -42,91 +42,32 @@ serve(async (req) => {
       throw new Error('Failed to store form data');
     }
 
-    // Generate elevator pitch using OpenAI with proprietary BNI prompt
-    const prompt = `Act as a CEO of a Business. Create a 30 Second Elevator pitch which ends with a specific ask.
+    // Queue the job for async processing instead of blocking the user
+    const { error: queueError } = await supabase
+      .from('job_queue')
+      .insert({
+        job_type: 'generate_pitch',
+        payload: { 
+          formData,
+          recordId: insertedData.id 
+        },
+        priority: 1, // High priority for user-facing requests
+        max_retries: 3
+      });
 
-Context -
-Name: ${formData.name}
-Company: ${formData.company}
-Business Category: ${formData.category}
-Unique Selling Point: ${formData.usp}
-Specific Ask: ${formData.specificAsk}
-
-Intent: This 30 second goes into a BNI community where other business owners will try to connect us to the Specific Ask audiences in their contact spheres. The intent is not to pitch the room, but the contact sphere/ network of the room.
-
-Example 30-Second Elevator pitch: 
-'Good morning everyone! My name is Kartik Vijayvargi and I own Perfect Vaastu Consultancy. We specialize in Vaastu, a traditional Indian practice of architecture and design. Our unique selling point is that we provide practical solutions to our clients. We have successfully completed several projects in the past. I am here today to ask if you can connect us to any new projects in your contact sphere. Thank you for your time and I look forward to hearing from you.'
-
-Instructions:
-Tone: Confident + Proud
-Style: Informative + Specific + Approachable + Engaging
-Voice: Professional + Industry-specific
-
-Return only the elevator pitch text, no additional formatting or explanations.`;
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are an expert business coach specializing in creating compelling elevator pitches. Your pitches are always exactly 30 seconds when spoken naturally.'
-          },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 200,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (queueError) {
+      console.error('Error queuing job:', queueError);
+      throw new Error('Failed to queue job for processing');
+    } else {
+      console.log('Job queued successfully for:', formData.company);
     }
 
-    const data = await response.json();
-    const generatedPitch = data.choices[0].message.content.trim();
-
-    // Update the database record with the generated pitch
-    const { error: updateError } = await supabase
-      .from('elevator_pitches')
-      .update({ generated_pitch: generatedPitch })
-      .eq('id', insertedData.id);
-
-    if (updateError) {
-      console.error('Error updating pitch:', updateError);
-    }
-
-    console.log('Successfully generated pitch for:', formData.company);
-
-    // Automatically sync to Google Sheets in the background
-    EdgeRuntime.waitUntil(
-      (async () => {
-        try {
-          console.log('Starting automatic Google Sheets sync...');
-          const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-to-google-sheets');
-          
-          if (syncError) {
-            console.error('Background sync error:', syncError);
-          } else {
-            console.log('Background sync successful:', syncData);
-          }
-        } catch (syncError) {
-          console.error('Background sync failed:', syncError);
-        }
-      })()
-    );
-
+    // Return immediately with the record info - pitch will be generated async
     return new Response(JSON.stringify({ 
-      generatedPitch,
       recordId: insertedData.id,
-      accessToken: insertedData.access_token
+      accessToken: insertedData.access_token,
+      status: 'processing',
+      message: 'Your elevator pitch is being generated. You will receive it shortly.'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
