@@ -14,6 +14,7 @@ import { AppOptimizations, PerformanceAnalytics } from "@/components/AppOptimiza
 // Import FormPage immediately (main landing page)
 import FormPage from "./pages/FormPage";
 import NotFound from "./pages/NotFound";
+import { GoogleSheetsDebug } from "@/components/GoogleSheetsDebug";
 
 // Lazy load heavy pages with performance tracking
 const LazyServicesPage = lazy(() => {
@@ -101,6 +102,7 @@ const App = () => {
                   </Suspense>
                 } 
               />
+              <Route path="/debug" element={<GoogleSheetsDebug />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
