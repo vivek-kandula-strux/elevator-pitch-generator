@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.sync-requirements-to-google-sheets]
 verify_jwt = false
+
+[functions.sync-to-google-sheets]
+verify_jwt = false

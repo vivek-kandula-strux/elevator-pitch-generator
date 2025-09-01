@@ -1,248 +1,162 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
+
+// Helpers
+const base64urlEncode = (input: string | ArrayBuffer): string => {
+  const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+};
+
+const pemToArrayBuffer = (pem: string): ArrayBuffer => {
+  const cleaned = pem
+    .replace(/-----BEGIN [A-Z ]+-----/g, '')
+    .replace(/-----END [A-Z ]+-----/g, '')
+    .replace(/\s+/g, '');
+  const raw = atob(cleaned);
+  const buf = new ArrayBuffer(raw.length);
+  const view = new Uint8Array(buf);
+  for (let i = 0; i < raw.length; i++) view[i] = raw.charCodeAt(i);
+  return buf;
+};
+
+const createGoogleAccessToken = async (clientEmail: string, privateKeyPem: string): Promise<string> => {
+  const now = Math.floor(Date.now() / 1000);
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const payload = {
+    iss: clientEmail,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+
+  const signingInput = `${base64urlEncode(JSON.stringify(header))}.${base64urlEncode(JSON.stringify(payload))}`;
+  const keyData = pemToArrayBuffer(privateKeyPem);
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    keyData,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(signingInput));
+  const jwt = `${signingInput}.${base64urlEncode(signature)}`;
+
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+  });
+
+  if (!tokenResponse.ok) {
+    const err = await tokenResponse.text();
+    throw new Error(`Google OAuth token exchange failed: ${err}`);
+  }
+
+  const tokenData = await tokenResponse.json();
+  return tokenData.access_token as string;
+};
 
 interface ElevatorPitch {
-  id: string
-  created_at: string
-  name: string
-  company: string
-  category: string
-  whatsapp: string
-  usp: string
-  specific_ask: string
-  generated_pitch: string | null
+  id: string;
+  created_at: string;
+  name: string;
+  company: string;
+  category: string;
+  whatsapp: string;
+  usp: string;
+  specific_ask: string;
+  generated_pitch: string | null;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    console.log('Starting Google Sheets sync...')
-    
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase credentials')
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    console.log('[ElevatorPitches Sync] Starting...');
 
-    // Get Google Sheets credentials from environment
-    const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL')
-    const rawPrivateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')
-    const sheetId = Deno.env.get('GOOGLE_SHEET_ID')
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !serviceKey) throw new Error('Missing Supabase credentials');
+    const supabase = createClient(supabaseUrl, serviceKey);
 
-    if (!clientEmail || !rawPrivateKey || !sheetId) {
-      throw new Error('Missing Google Sheets credentials. Please ensure GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY, and GOOGLE_SHEET_ID are set.')
-    }
-
-    console.log('Credentials found, processing private key...')
-
-    // Clean and format the private key
-    let privateKey: string
-    try {
-      // Remove quotes if present and handle escaped newlines
-      privateKey = rawPrivateKey
-        .replace(/^"|"$/g, '') // Remove surrounding quotes
-        .replace(/\\n/g, '\n') // Convert escaped newlines to actual newlines
-        .trim()
-      
-      // Validate private key format
-      if (!privateKey.includes('-----BEGIN PRIVATE KEY-----') || !privateKey.includes('-----END PRIVATE KEY-----')) {
-        throw new Error('Invalid private key format - must be a valid PEM formatted private key')
-      }
-      
-      console.log('Private key processed successfully')
-    } catch (keyError) {
-      console.error('Private key processing error:', keyError)
-      throw new Error(`Failed to process private key: ${keyError.message}`)
-    }
-
-    // Fetch all elevator pitches from database
-    const { data: pitches, error: fetchError } = await supabase
+    const { data: pitches, error } = await supabase
       .from('elevator_pitches')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
+    if (error) throw error;
 
-    if (fetchError) {
-      console.error('Error fetching pitches:', fetchError)
-      throw new Error(`Failed to fetch pitches: ${fetchError.message}`)
+    console.log(`[ElevatorPitches Sync] Fetched ${pitches?.length ?? 0} rows`);
+
+    const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL');
+    const privateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+    const sheetId = Deno.env.get('GOOGLE_SHEET_ID');
+    if (!clientEmail || !privateKey || !sheetId) {
+      throw new Error('Missing Google Sheets credentials. Ensure GOOGLE_SHEETS_CLIENT_EMAIL, GOOGLE_SHEETS_PRIVATE_KEY, and GOOGLE_SHEET_ID are set.');
     }
 
-    console.log(`Found ${pitches?.length || 0} pitches to sync`)
+    const accessToken = await createGoogleAccessToken(clientEmail, privateKey);
 
-    // Create JWT for Google Sheets API authentication
-    const now = Math.floor(Date.now() / 1000)
-    const header = {
-      alg: 'RS256',
-      typ: 'JWT'
-    }
+    const headerRow = ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'];
+    const dataRows = (pitches ?? []).map((p: ElevatorPitch) => [
+      p.name ?? '',
+      p.company ?? '',
+      p.category ?? '',
+      p.whatsapp ?? '',
+      p.usp ?? '',
+      p.specific_ask ?? '',
+      p.generated_pitch ?? '',
+      p.created_at ? new Date(p.created_at).toLocaleString() : '',
+    ]);
+    const values = [headerRow, ...dataRows];
 
-    const payload = {
-      iss: clientEmail,
-      scope: 'https://www.googleapis.com/auth/spreadsheets',
-      aud: 'https://oauth2.googleapis.com/token',
-      exp: now + 3600,
-      iat: now
-    }
+    const sheetName = 'ElevatorPitches';
 
-    // Create JWT token manually (simplified version)
-    const encoder = new TextEncoder()
-    const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-    const payloadB64 = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-    
-    const signatureInput = `${headerB64}.${payloadB64}`
-    
-    // Import the private key for signing
-    let binaryKey: Uint8Array
-    try {
-      const privateKeyFormatted = privateKey
-        .replace('-----BEGIN PRIVATE KEY-----', '')
-        .replace('-----END PRIVATE KEY-----', '')
-        .replace(/\s/g, '')
-      
-      console.log('Attempting to decode private key...')
-      binaryKey = Uint8Array.from(atob(privateKeyFormatted), c => c.charCodeAt(0))
-      console.log('Private key decoded successfully')
-    } catch (decodeError) {
-      console.error('Base64 decode error:', decodeError)
-      throw new Error(`Failed to decode private key: ${decodeError.message}. Please ensure the private key is properly formatted.`)
-    }
-    
-    const cryptoKey = await crypto.subtle.importKey(
-      'pkcs8',
-      binaryKey,
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: 'SHA-256'
-      },
-      false,
-      ['sign']
-    )
-
-    const signature = await crypto.subtle.sign(
-      'RSASSA-PKCS1-v1_5',
-      cryptoKey,
-      encoder.encode(signatureInput)
-    )
-
-    const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-      .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
-    
-    const jwt = `${signatureInput}.${signatureB64}`
-
-    // Get access token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    // Try creating the sheet if it doesn't exist
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
-    })
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: [{ addSheet: { properties: { title: sheetName } } }] }),
+    }).catch(() => {});
 
-    if (!tokenResponse.ok) {
-      const tokenError = await tokenResponse.text()
-      console.error('Token error:', tokenError)
-      throw new Error(`Failed to get access token: ${tokenError}`)
+    // Clear existing content
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}:clear`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    });
+
+    // Write new content
+    const putRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?valueInputOption=RAW`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values }),
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.text();
+      console.error('[ElevatorPitches Sync] Sheets update error:', err);
+      throw new Error(`Failed to update Google Sheet: ${err}`);
     }
 
-    const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token
-
-    console.log('Successfully obtained access token')
-
-    // Prepare data for Google Sheets
-    const sheetData = [
-      // Header row
-      ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'],
-      // Data rows
-      ...(pitches || []).map((pitch: ElevatorPitch) => [
-        pitch.name,
-        pitch.company,
-        pitch.category,
-        pitch.whatsapp,
-        pitch.usp,
-        pitch.specific_ask,
-        pitch.generated_pitch || '',
-        new Date(pitch.created_at).toLocaleDateString()
-      ])
-    ]
-
-    // Clear existing data and add new data
-    const clearResponse = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1:clear`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    )
-
-    if (!clearResponse.ok) {
-      const clearError = await clearResponse.text()
-      console.error('Clear error:', clearError)
-      throw new Error(`Failed to clear sheet: ${clearError}`)
-    }
-
-    // Add new data
-    const updateResponse = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?valueInputOption=USER_ENTERED`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          values: sheetData
-        })
-      }
-    )
-
-    if (!updateResponse.ok) {
-      const updateError = await updateResponse.text()
-      console.error('Update error:', updateError)
-      throw new Error(`Failed to update sheet: ${updateError}`)
-    }
-
-    const updateResult = await updateResponse.json()
-    console.log('Successfully synced to Google Sheets:', updateResult)
+    console.log('[ElevatorPitches Sync] Success');
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Successfully synced ${pitches?.length || 0} elevator pitches to Google Sheets`,
-        syncedCount: pitches?.length || 0
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    )
-
-  } catch (error) {
-    console.error('Sync error:', error)
+      JSON.stringify({ success: true, sheet: sheetName, recordsProcessed: pitches?.length ?? 0 }),
+      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  } catch (e: any) {
+    console.error('[ElevatorPitches Sync] Error:', e?.message || e);
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
-    )
+      JSON.stringify({ success: false, error: String(e?.message || e) }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
   }
-})
+});
