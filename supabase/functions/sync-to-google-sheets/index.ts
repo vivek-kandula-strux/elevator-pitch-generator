@@ -81,20 +81,45 @@ serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
-    console.log('[ElevatorPitches Sync] Starting...');
+    console.log('[ElevatorPitches Sync] Starting incremental sync...');
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!supabaseUrl || !serviceKey) throw new Error('Missing Supabase credentials');
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const syncType = 'elevator_pitches';
+    
+    // Get last sync timestamp
+    const { data: syncMeta } = await supabase
+      .from('sync_metadata')
+      .select('last_sync_timestamp')
+      .eq('sync_type', syncType)
+      .single();
+
+    const lastSyncTime = syncMeta?.last_sync_timestamp || '1970-01-01T00:00:00Z';
+    console.log(`[ElevatorPitches Sync] Last sync: ${lastSyncTime}`);
+
+    // Fetch only new/updated records
     const { data: pitches, error } = await supabase
       .from('elevator_pitches')
       .select('*')
-      .order('created_at', { ascending: false });
+      .or(`created_at.gt.${lastSyncTime},updated_at.gt.${lastSyncTime}`)
+      .order('created_at', { ascending: false })
+      .limit(100); // Batch limit
+
     if (error) throw error;
 
-    console.log(`[ElevatorPitches Sync] Fetched ${pitches?.length ?? 0} rows`);
+    // Early return if no new records
+    if (!pitches || pitches.length === 0) {
+      console.log('[ElevatorPitches Sync] No new records found');
+      return new Response(
+        JSON.stringify({ success: true, sheet: 'ElevatorPitches', recordsProcessed: 0, incremental: true }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    console.log(`[ElevatorPitches Sync] Found ${pitches.length} new/updated records`);
 
     const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL');
     const privateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')?.replace(/\\n/g, '\n');
@@ -105,51 +130,88 @@ serve(async (req: Request) => {
 
     const accessToken = await createGoogleAccessToken(clientEmail, privateKey);
 
-    const headerRow = ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'];
-    const dataRows = (pitches ?? []).map((p: ElevatorPitch) => [
-      p.name ?? '',
-      p.company ?? '',
-      p.category ?? '',
-      p.whatsapp ?? '',
-      p.usp ?? '',
-      p.specific_ask ?? '',
-      p.generated_pitch ?? '',
-      p.created_at ? new Date(p.created_at).toLocaleString() : '',
-    ]);
-    const values = [headerRow, ...dataRows];
-
     const sheetName = 'ElevatorPitches';
+    const isFirstSync = !syncMeta;
 
-    // Try creating the sheet if it doesn't exist
+    // Create sheet if it doesn't exist
     await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ requests: [{ addSheet: { properties: { title: sheetName } } }] }),
     }).catch(() => {});
 
-    // Clear existing content
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}:clear`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-    });
+    let appendRes;
+    if (isFirstSync) {
+      // First sync: clear and write headers + data
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}:clear`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      });
 
-    // Write new content
-    const putRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?valueInputOption=RAW`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values }),
-    });
+      const headerRow = ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'];
+      const dataRows = pitches.map((p: ElevatorPitch) => [
+        p.name ?? '',
+        p.company ?? '',
+        p.category ?? '',
+        p.whatsapp ?? '',
+        p.usp ?? '',
+        p.specific_ask ?? '',
+        p.generated_pitch ?? '',
+        p.created_at ? new Date(p.created_at).toLocaleString() : '',
+      ]);
+      const values = [headerRow, ...dataRows];
 
-    if (!putRes.ok) {
-      const err = await putRes.text();
+      appendRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?valueInputOption=RAW`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values }),
+      });
+    } else {
+      // Incremental sync: append only new data
+      const dataRows = pitches.map((p: ElevatorPitch) => [
+        p.name ?? '',
+        p.company ?? '',
+        p.category ?? '',
+        p.whatsapp ?? '',
+        p.usp ?? '',
+        p.specific_ask ?? '',
+        p.generated_pitch ?? '',
+        p.created_at ? new Date(p.created_at).toLocaleString() : '',
+      ]);
+
+      appendRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: dataRows }),
+      });
+    }
+
+    if (!appendRes.ok) {
+      const err = await appendRes.text();
       console.error('[ElevatorPitches Sync] Sheets update error:', err);
       throw new Error(`Failed to update Google Sheet: ${err}`);
     }
 
-    console.log('[ElevatorPitches Sync] Success');
+    // Update sync metadata
+    const now = new Date().toISOString();
+    await supabase
+      .from('sync_metadata')
+      .upsert({
+        sync_type: syncType,
+        last_sync_timestamp: now,
+        last_sync_row_count: pitches.length,
+        sync_status: 'success'
+      });
+
+    console.log(`[ElevatorPitches Sync] Success - ${isFirstSync ? 'Full' : 'Incremental'} sync completed`);
 
     return new Response(
-      JSON.stringify({ success: true, sheet: sheetName, recordsProcessed: pitches?.length ?? 0 }),
+      JSON.stringify({ 
+        success: true, 
+        sheet: sheetName, 
+        recordsProcessed: pitches.length,
+        syncType: isFirstSync ? 'full' : 'incremental'
+      }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   } catch (e: any) {

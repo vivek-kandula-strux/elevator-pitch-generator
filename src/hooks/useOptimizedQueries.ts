@@ -220,26 +220,46 @@ export const useDataPrefetching = () => {
   }, [queryClient]);
 };
 
-// Background sync hook for keeping data fresh
+// Background sync hook for keeping data fresh with optimized intervals
 export const useBackgroundSync = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Background refresh of critical data every 2 minutes
-      queryClient.invalidateQueries({ 
-        queryKey: ['elevator_pitches'], 
-        refetchType: 'active' 
-      });
-      
-      // Refresh requirements every minute
-      queryClient.invalidateQueries({ 
-        queryKey: ['requirements'], 
-        refetchType: 'active' 
-      });
-    }, 2 * 60 * 1000); // 2 minutes
+    // Check if page is visible and reduce frequency
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Invalidate queries when page becomes visible
+        queryClient.invalidateQueries({ 
+          queryKey: ['elevator_pitches'], 
+          refetchType: 'active' 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: ['requirements'], 
+          refetchType: 'active' 
+        });
+      }
+    };
 
-    return () => clearInterval(interval);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Less aggressive interval - only sync when page is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        queryClient.invalidateQueries({ 
+          queryKey: ['elevator_pitches'], 
+          refetchType: 'active' 
+        });
+        queryClient.invalidateQueries({ 
+          queryKey: ['requirements'], 
+          refetchType: 'active' 
+        });
+      }
+    }, 5 * 60 * 1000); // Every 5 minutes instead of 2
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [queryClient]);
 };
 
