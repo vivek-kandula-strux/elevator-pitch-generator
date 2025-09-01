@@ -31,14 +31,20 @@ const ClientLogo = ({ logo, className }: { logo: { name: string; filename: strin
         className={`max-w-32 max-h-10 object-contain hover:brightness-110 transition-all duration-300 ${className}`}
         loading="lazy"
         onError={(e) => {
-          // Fallback to a placeholder if image fails to load
+          // Safe fallback without innerHTML injection
           const target = e.target as HTMLImageElement;
           target.style.display = 'none';
-          target.parentElement!.innerHTML = `
-            <div class="w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm">
-              <span class="text-sm text-slate-700 font-medium">${logo.name}</span>
-            </div>
-          `;
+          
+          // Create safe fallback element
+          const fallback = document.createElement('div');
+          fallback.className = 'w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm';
+          
+          const span = document.createElement('span');
+          span.className = 'text-sm text-slate-700 font-medium';
+          span.textContent = logo.name; // Safe text assignment
+          
+          fallback.appendChild(span);
+          target.parentElement!.appendChild(fallback);
         }}
       />
     </div>

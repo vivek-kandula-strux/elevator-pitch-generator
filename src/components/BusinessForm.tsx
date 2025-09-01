@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
 import { useDebounce } from '@/hooks/useDebounce';
+import { sanitizeFormData, validatePhone, validateRequired } from '@/utils/inputSanitizer';
 interface FormData {
   name: string;
   whatsapp: string;
@@ -40,24 +41,24 @@ const BusinessForm = React.memo(function BusinessForm({
 
   const validateForm = useCallback((): boolean => {
     const newErrors: Partial<FormData> = {};
-    if (!formData.name.trim()) {
+    if (!validateRequired(formData.name)) {
       newErrors.name = 'Name is required';
     }
-    if (!formData.whatsapp.trim()) {
+    if (!validateRequired(formData.whatsapp)) {
       newErrors.whatsapp = 'WhatsApp number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.whatsapp)) {
+    } else if (!validatePhone(formData.whatsapp)) {
       newErrors.whatsapp = 'Please enter a valid phone number';
     }
-    if (!formData.company.trim()) {
+    if (!validateRequired(formData.company)) {
       newErrors.company = 'Company name is required';
     }
     if (!formData.category) {
       newErrors.category = 'Business category is required';
     }
-    if (!formData.usp.trim()) {
+    if (!validateRequired(formData.usp)) {
       newErrors.usp = 'Unique Selling Point is required';
     }
-    if (!formData.specificAsk.trim()) {
+    if (!validateRequired(formData.specificAsk)) {
       newErrors.specificAsk = 'Please describe your target audience and goals';
     }
     setErrors(newErrors);
@@ -66,12 +67,15 @@ const BusinessForm = React.memo(function BusinessForm({
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+      // Sanitize form data before submission
+      const sanitizedData = sanitizeFormData(formData) as FormData;
+      
       trackFormSubmission('business_form', {
-        company: formData.company,
-        category: formData.category,
+        company: sanitizedData.company,
+        category: sanitizedData.category,
         form_step: 'completed'
       });
-      onSubmit(formData);
+      onSubmit(sanitizedData);
     } else {
       const errorFields = Object.keys(errors).join(', ');
       trackFormError('business_form', `Validation failed: ${errorFields}`);
