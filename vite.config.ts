@@ -50,8 +50,8 @@ export default defineConfig(({ mode }) => ({
       'react-dom', 
       '@tanstack/react-query',
       'framer-motion',
-      'lucide-react'
+      'lucide-react',
+      '@supabase/supabase-js' // Include instead of exclude to fix module resolution
     ],
-    exclude: ['@supabase/supabase-js'],
   },
 }));
