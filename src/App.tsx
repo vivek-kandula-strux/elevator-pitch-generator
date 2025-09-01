@@ -10,13 +10,14 @@ import { FloatingWidget } from "@/components/FloatingWidget";
 import { PageSkeleton, ServicesSkeleton } from "@/components/loading/PageSkeleton";
 import { measureFCP, estimateBundleImpact, logBundleSplit } from "@/utils/performanceMonitor";
 import { AppOptimizations, PerformanceAnalytics } from "@/components/AppOptimizations";
+import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 
-// Import FormPage immediately (main landing page)
-import FormPage from "./pages/FormPage";
-import NotFound from "./pages/NotFound";
-import { GoogleSheetsDebug } from "@/components/GoogleSheetsDebug";
+// Lazy load ALL pages including FormPage for maximum performance
+const LazyFormPage = lazy(() => {
+  logBundleSplit('FormPage');
+  return import("./pages/FormPage");
+});
 
-// Lazy load heavy pages with performance tracking
 const LazyServicesPage = lazy(() => {
   logBundleSplit('ServicesPage');
   return import("./pages/ServicesPage");
@@ -32,27 +33,29 @@ const LazyResultsPage = lazy(() => {
   return import("./pages/ResultsPage");
 });
 
+import NotFound from "./pages/NotFound";
+import { GoogleSheetsDebug } from "@/components/GoogleSheetsDebug";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Aggressive caching: data stays fresh for 5 minutes
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      // Keep data in cache for 15 minutes (gcTime is the new name for cacheTime)
-      gcTime: 15 * 60 * 1000, // 15 minutes
-      // Reduce retries to minimize API calls
+      // Ultra-aggressive caching for performance
+      staleTime: 10 * 60 * 1000, // 10 minutes (increased from 5)
+      gcTime: 30 * 60 * 1000, // 30 minutes cache retention
       retry: 1,
-      // Disable refetch on window focus to reduce API calls
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Minimize background refetching for performance
       refetchOnWindowFocus: false,
-      // Background refetch every 2 minutes for fresh data
-      refetchInterval: 2 * 60 * 1000, // 2 minutes
-      // Enable background refetch only when window is focused
-      refetchIntervalInBackground: false,
-      // Request deduplication - avoid duplicate requests
-      refetchOnMount: true,
+      refetchOnMount: false, // Changed to false for performance
       refetchOnReconnect: 'always',
+      refetchInterval: false, // Disabled automatic refetch
+      refetchIntervalInBackground: false,
+      // Enable request deduplication
+      networkMode: 'online',
     },
     mutations: {
       retry: 1,
+      retryDelay: 1000,
     },
   },
 });
@@ -75,9 +78,17 @@ const App = () => {
             {/* Performance optimizations */}
             <AppOptimizations />
             <PerformanceAnalytics />
+            <PerformanceMonitor />
             
             <Routes>
-              <Route path="/" element={<FormPage />} />
+              <Route 
+                path="/" 
+                element={
+                  <Suspense fallback={<PageSkeleton />}>
+                    <LazyFormPage />
+                  </Suspense>
+                } 
+              />
               <Route 
                 path="/services" 
                 element={

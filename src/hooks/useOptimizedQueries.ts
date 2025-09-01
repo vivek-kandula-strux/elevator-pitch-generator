@@ -220,45 +220,70 @@ export const useDataPrefetching = () => {
   }, [queryClient]);
 };
 
-// Background sync hook for keeping data fresh with optimized intervals
+// Ultra-optimized background sync with intelligent scheduling
 export const useBackgroundSync = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Check if page is visible and reduce frequency
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Invalidate queries when page becomes visible
-        queryClient.invalidateQueries({ 
-          queryKey: ['elevator_pitches'], 
-          refetchType: 'active' 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: ['requirements'], 
-          refetchType: 'active' 
-        });
-      }
+    let visibilityTimer: NodeJS.Timeout;
+    let isUserActive = true;
+    
+    // Track user activity to avoid unnecessary syncs
+    const handleUserActivity = () => {
+      isUserActive = true;
     };
+
+    // Debounced visibility change handler
+    const handleVisibilityChange = () => {
+      clearTimeout(visibilityTimer);
+      
+      visibilityTimer = setTimeout(() => {
+        if (document.visibilityState === 'visible' && isUserActive) {
+          // Only invalidate if data is stale (older than 8 minutes)
+          const staleThreshold = 8 * 60 * 1000;
+          const now = Date.now();
+          
+          queryClient.getQueryCache().getAll().forEach(query => {
+            const lastFetch = query.state.dataUpdatedAt;
+            if (now - lastFetch > staleThreshold) {
+              queryClient.invalidateQueries({ 
+                queryKey: query.queryKey, 
+                refetchType: 'active' 
+              });
+            }
+          });
+          
+          isUserActive = false; // Reset activity flag
+        }
+      }, 1500); // Debounce for 1.5 seconds
+    };
+
+    // Listen for user interactions
+    ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+      document.addEventListener(event, handleUserActivity, { passive: true });
+    });
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Less aggressive interval - only sync when page is visible
+    // Ultra-conservative interval - 10 minutes and only for critical data
     const interval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && isUserActive) {
+        // Only sync truly critical queries
         queryClient.invalidateQueries({ 
-          queryKey: ['elevator_pitches'], 
-          refetchType: 'active' 
-        });
-        queryClient.invalidateQueries({ 
-          queryKey: ['requirements'], 
-          refetchType: 'active' 
+          queryKey: queryKeys.elevatorPitches.recent(5), // Reduced from 10
+          refetchType: 'active',
+          exact: true
         });
       }
-    }, 5 * 60 * 1000); // Every 5 minutes instead of 2
+    }, 10 * 60 * 1000); // Every 10 minutes
 
     return () => {
+      clearTimeout(visibilityTimer);
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+        document.removeEventListener(event, handleUserActivity);
+      });
     };
   }, [queryClient]);
 };
