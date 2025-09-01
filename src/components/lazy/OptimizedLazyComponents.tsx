@@ -28,7 +28,7 @@ const createOptimizedLazy = <T extends ComponentType<any>>(
   });
 };
 
-// Critical components (load immediately)
+// Critical components (load immediately) - these use default exports
 export const LazyBusinessForm = createOptimizedLazy(
   () => import('@/components/BusinessForm'),
   'BusinessForm',
@@ -47,7 +47,7 @@ export const LazyHeader = createOptimizedLazy(
   'high'
 );
 
-// Secondary components (load when needed)
+// Secondary components (load when needed) - these use named exports
 export const LazyServiceModal = createOptimizedLazy(
   () => import('@/components/ServiceModal').then(m => ({ default: m.ServiceModal })),
   'ServiceModal',
@@ -66,14 +66,14 @@ export const LazyRequirementForm = createOptimizedLazy(
   'medium'
 );
 
-// Deferred components (load on idle)
+// Deferred components (load on idle) - mixed export types
 export const LazyFloatingWidget = createOptimizedLazy(
   () => import('@/components/FloatingWidget').then(m => ({ default: m.FloatingWidget })),
   'FloatingWidget',
   'low'
 );
 
-// Section components with optimized loading
+// Section components with optimized loading - these use named exports
 export const LazyEnhancedHeroSection = createOptimizedLazy(
   () => import('@/components/sections/EnhancedHeroSection').then(m => ({ default: m.EnhancedHeroSection })),
   'EnhancedHeroSection',
