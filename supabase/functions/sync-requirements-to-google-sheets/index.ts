@@ -230,16 +230,16 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Update sync metadata for requirements
-    const now = new Date().toISOString();
+    const currentTimestamp = new Date().toISOString();
     const upsertResult = await supabase
       .from('sync_metadata')
       .upsert({
         sync_type: 'requirements',
-        last_sync_timestamp: now,
+        last_sync_timestamp: currentTimestamp,
         last_sync_row_count: requirements.length,
         sync_status: 'success',
         error_details: null,
-        updated_at: now
+        updated_at: currentTimestamp
       }, {
         onConflict: 'sync_type'
       });

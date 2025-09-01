@@ -316,16 +316,16 @@ serve(async (req) => {
     }
 
     // Update sync metadata
-    const now = new Date().toISOString()
+    const currentTimestamp = new Date().toISOString()
     const upsertResult = await supabase
       .from('sync_metadata')
       .upsert({
         sync_type: 'elevator_pitches',
-        last_sync_timestamp: now,
+        last_sync_timestamp: currentTimestamp,
         last_sync_row_count: pitches.length,
         sync_status: 'success',
         error_details: null,
-        updated_at: now
+        updated_at: currentTimestamp
       }, {
         onConflict: 'sync_type'
       })
