@@ -20,73 +20,18 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get last sync metadata for requirements
-    const { data: syncMetadata } = await supabase
-      .from('sync_metadata')
+    // Fetch all requirements data
+    const { data: requirements, error: fetchError } = await supabase
+      .from('requirements')
       .select('*')
-      .eq('sync_type', 'requirements')
-      .single();
-    
-    console.log('Last requirements sync metadata:', syncMetadata);
-    
-    // Determine sync strategy for requirements
-    let requirements: any[] = [];
-    let isIncrementalSync = false;
-    const BATCH_SIZE = 100;
-    
-    if (syncMetadata?.last_sync_timestamp) {
-      // Incremental sync
-      const { data: newRequirements, error: fetchError } = await supabase
-        .from('requirements')
-        .select('*')
-        .or(`created_at.gt.${syncMetadata.last_sync_timestamp},updated_at.gt.${syncMetadata.last_sync_timestamp}`)
-        .order('created_at', { ascending: false })
-        .limit(BATCH_SIZE);
+      .order('created_at', { ascending: false });
 
-      if (fetchError) {
-        console.error('Error fetching new requirements:', fetchError);
-        throw fetchError;
-      }
-      
-      requirements = newRequirements || [];
-      isIncrementalSync = true;
-      console.log(`Incremental sync: Found ${requirements.length} new/updated requirements`);
-      
-      // Early return if no new records
-      if (requirements.length === 0) {
-        console.log('No new requirements to sync, returning early');
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: 'No new requirements to sync',
-            recordsProcessed: 0,
-            isIncremental: true
-          }),
-          {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/json',
-              ...corsHeaders,
-            },
-          }
-        );
-      }
-    } else {
-      // First-time sync
-      const { data: allRequirements, error: fetchError } = await supabase
-        .from('requirements')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(BATCH_SIZE);
-
-      if (fetchError) {
-        console.error('Error fetching all requirements:', fetchError);
-        throw fetchError;
-      }
-      
-      requirements = allRequirements || [];
-      console.log(`First-time sync: Found ${requirements.length} requirements`);
+    if (fetchError) {
+      console.error('Error fetching requirements:', fetchError);
+      throw fetchError;
     }
+
+    console.log(`Fetched ${requirements?.length || 0} requirements`);
 
     // Google Sheets API setup
     const googleClientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL');
@@ -141,7 +86,8 @@ const handler = async (req: Request): Promise<Response> => {
     const accessToken = tokenData.access_token;
 
     // Prepare requirements data for Google Sheets
-    const dataRows = requirements.map(req => [
+    const headerRow = ['Name', 'Email', 'Company', 'WhatsApp', 'Service Type', 'Message', 'Created Date'];
+    const dataRows = requirements?.map(req => [
       req.name,
       req.email,
       req.company,
@@ -149,105 +95,59 @@ const handler = async (req: Request): Promise<Response> => {
       req.service_type,
       req.message,
       new Date(req.created_at).toLocaleDateString()
-    ]);
+    ]) || [];
 
-    // Handle sheet creation and data sync
-    if (isIncrementalSync && requirements.length > 0) {
-      // Incremental sync: append new data to Requirements sheet
-      console.log('Performing incremental requirements sync - appending data');
-      
-      const appendResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/Requirements:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
+    const allRows = [headerRow, ...dataRows];
+
+    // Create or update the "Requirements" sheet
+    try {
+      // First, try to add the sheet (in case it doesn't exist)
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}:batchUpdate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          values: dataRows,
-        }),
-      });
-
-      if (!appendResponse.ok) {
-        const errorText = await appendResponse.text();
-        console.error('Error appending to Google Sheets:', errorText);
-        throw new Error(`Failed to append to Google Sheets: ${errorText}`);
-      }
-    } else {
-      // First-time sync: create sheet if needed and write all data
-      console.log('Performing first-time requirements sync');
-      
-      // Try to add the sheet (in case it doesn't exist)
-      try {
-        await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}:batchUpdate`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            requests: [{
-              addSheet: {
-                properties: {
-                  title: 'Requirements'
-                }
+          requests: [{
+            addSheet: {
+              properties: {
+                title: 'Requirements'
               }
-            }]
-          }),
-        });
-      } catch (error) {
-        console.log('Requirements sheet might already exist, continuing...');
-      }
-
-      // Clear existing data in Requirements sheet
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/Requirements:clear`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // Write header and data to Requirements sheet
-      const headerRow = ['Name', 'Email', 'Company', 'WhatsApp', 'Service Type', 'Message', 'Created Date'];
-      const allRows = [headerRow, ...dataRows];
-      
-      const updateResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/Requirements?valueInputOption=RAW`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          values: allRows,
+            }
+          }]
         }),
       });
-
-      if (!updateResponse.ok) {
-        const errorText = await updateResponse.text();
-        console.error('Error updating Google Sheets:', errorText);
-        throw new Error(`Failed to update Google Sheets: ${errorText}`);
-      }
+    } catch (error) {
+      // Sheet might already exist, continue
+      console.log('Sheet might already exist, continuing...');
     }
 
-    // Update sync metadata for requirements
-    const currentTimestamp = new Date().toISOString();
-    const upsertResult = await supabase
-      .from('sync_metadata')
-      .upsert({
-        sync_type: 'requirements',
-        last_sync_timestamp: currentTimestamp,
-        last_sync_row_count: requirements.length,
-        sync_status: 'success',
-        error_details: null,
-        updated_at: currentTimestamp
-      }, {
-        onConflict: 'sync_type'
-      });
+    // Clear existing data in Requirements sheet
+    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/Requirements:clear`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-    if (upsertResult.error) {
-      console.error('Error updating requirements sync metadata:', upsertResult.error);
-    } else {
-      console.log('Updated requirements sync metadata successfully');
+    // Write new data to Requirements sheet
+    const updateResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/Requirements?valueInputOption=RAW`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        values: allRows,
+      }),
+    });
+
+    if (!updateResponse.ok) {
+      const errorText = await updateResponse.text();
+      console.error('Error updating Google Sheets:', errorText);
+      throw new Error(`Failed to update Google Sheets: ${errorText}`);
     }
 
     console.log('Requirements successfully synced to Google Sheets');
@@ -256,9 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         message: 'Requirements synced to Google Sheets successfully',
-        recordsProcessed: requirements.length,
-        isIncremental: isIncrementalSync,
-        syncType: isIncrementalSync ? 'incremental' : 'full'
+        recordsProcessed: requirements?.length || 0
       }),
       {
         status: 200,
@@ -271,26 +169,6 @@ const handler = async (req: Request): Promise<Response> => {
 
   } catch (error: any) {
     console.error('Error in sync-requirements-to-google-sheets function:', error);
-    
-    // Update sync metadata with error for requirements
-    try {
-      await supabase
-        .from('sync_metadata')
-        .upsert({
-          sync_type: 'requirements',
-          sync_status: 'failed',
-          error_details: { 
-            message: error.message, 
-            timestamp: new Date().toISOString() 
-          },
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'sync_type'
-        });
-    } catch (metaError) {
-      console.error('Failed to update requirements error metadata:', metaError);
-    }
-    
     return new Response(
       JSON.stringify({ 
         error: error.message,

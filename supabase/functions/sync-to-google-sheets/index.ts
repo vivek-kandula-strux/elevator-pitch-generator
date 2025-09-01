@@ -9,7 +9,6 @@ const corsHeaders = {
 interface ElevatorPitch {
   id: string
   created_at: string
-  updated_at: string
   name: string
   company: string
   category: string
@@ -18,17 +17,6 @@ interface ElevatorPitch {
   specific_ask: string
   generated_pitch: string | null
 }
-
-interface SyncMetadata {
-  id: string
-  sync_type: string
-  last_sync_timestamp: string
-  last_sync_row_count: number
-  sync_status: 'success' | 'partial' | 'failed'
-  error_details?: any
-}
-
-const BATCH_SIZE = 100
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -80,69 +68,18 @@ serve(async (req) => {
       throw new Error(`Failed to process private key: ${keyError.message}`)
     }
 
-    // Get last sync metadata
-    const { data: syncMetadata } = await supabase
-      .from('sync_metadata')
+    // Fetch all elevator pitches from database
+    const { data: pitches, error: fetchError } = await supabase
+      .from('elevator_pitches')
       .select('*')
-      .eq('sync_type', 'elevator_pitches')
-      .single()
-    
-    console.log('Last sync metadata:', syncMetadata)
-    
-    // Determine sync strategy
-    let pitches: ElevatorPitch[] = []
-    let isIncrementalSync = false
-    
-    if (syncMetadata?.last_sync_timestamp) {
-      // Incremental sync - only get records updated since last sync
-      const { data: newPitches, error: fetchError } = await supabase
-        .from('elevator_pitches')
-        .select('*')
-        .or(`created_at.gt.${syncMetadata.last_sync_timestamp},updated_at.gt.${syncMetadata.last_sync_timestamp}`)
-        .order('created_at', { ascending: false })
-        .limit(BATCH_SIZE)
+      .order('created_at', { ascending: false })
 
-      if (fetchError) {
-        console.error('Error fetching new pitches:', fetchError)
-        throw new Error(`Failed to fetch new pitches: ${fetchError.message}`)
-      }
-      
-      pitches = newPitches || []
-      isIncrementalSync = true
-      console.log(`Incremental sync: Found ${pitches.length} new/updated pitches since ${syncMetadata.last_sync_timestamp}`)
-      
-      // Early return if no new records
-      if (pitches.length === 0) {
-        console.log('No new records to sync, returning early')
-        return new Response(
-          JSON.stringify({
-            success: true,
-            message: 'No new elevator pitches to sync',
-            syncedCount: 0,
-            isIncremental: true
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200
-          }
-        )
-      }
-    } else {
-      // First-time sync - get all records but limit to batch size
-      const { data: allPitches, error: fetchError } = await supabase
-        .from('elevator_pitches')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(BATCH_SIZE)
-
-      if (fetchError) {
-        console.error('Error fetching all pitches:', fetchError)
-        throw new Error(`Failed to fetch pitches: ${fetchError.message}`)
-      }
-      
-      pitches = allPitches || []
-      console.log(`First-time sync: Found ${pitches.length} pitches to sync`)
+    if (fetchError) {
+      console.error('Error fetching pitches:', fetchError)
+      throw new Error(`Failed to fetch pitches: ${fetchError.message}`)
     }
+
+    console.log(`Found ${pitches?.length || 0} pitches to sync`)
 
     // Create JWT for Google Sheets API authentication
     const now = Math.floor(Date.now() / 1000)
@@ -225,125 +162,69 @@ serve(async (req) => {
     console.log('Successfully obtained access token')
 
     // Prepare data for Google Sheets
-    const dataRows = pitches.map((pitch: ElevatorPitch) => [
-      pitch.name,
-      pitch.company,
-      pitch.category,
-      pitch.whatsapp,
-      pitch.usp,
-      pitch.specific_ask,
-      pitch.generated_pitch || '',
-      new Date(pitch.created_at).toLocaleDateString()
-    ])
+    const sheetData = [
+      // Header row
+      ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'],
+      // Data rows
+      ...(pitches || []).map((pitch: ElevatorPitch) => [
+        pitch.name,
+        pitch.company,
+        pitch.category,
+        pitch.whatsapp,
+        pitch.usp,
+        pitch.specific_ask,
+        pitch.generated_pitch || '',
+        new Date(pitch.created_at).toLocaleDateString()
+      ])
+    ]
 
-    let updateResult: any
-    
-    if (isIncrementalSync && pitches.length > 0) {
-      // Incremental sync: append new data
-      console.log('Performing incremental sync - appending data')
-      const appendResponse = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            values: dataRows
-          })
+    // Clear existing data and add new data
+    const clearResponse = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1:clear`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         }
-      )
-
-      if (!appendResponse.ok) {
-        const appendError = await appendResponse.text()
-        console.error('Append error:', appendError)
-        throw new Error(`Failed to append to sheet: ${appendError}`)
       }
+    )
 
-      updateResult = await appendResponse.json()
-      console.log('Successfully appended to Google Sheets:', updateResult)
-    } else {
-      // First-time sync: clear and rewrite with headers
-      console.log('Performing first-time sync - clearing and rewriting sheet')
-      
-      // Clear existing data
-      const clearResponse = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1:clear`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-
-      if (!clearResponse.ok) {
-        const clearError = await clearResponse.text()
-        console.error('Clear error:', clearError)
-        throw new Error(`Failed to clear sheet: ${clearError}`)
-      }
-
-      // Add header row and data
-      const sheetData = [
-        ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'],
-        ...dataRows
-      ]
-      
-      const updateResponse = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?valueInputOption=USER_ENTERED`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            values: sheetData
-          })
-        }
-      )
-
-      if (!updateResponse.ok) {
-        const updateError = await updateResponse.text()
-        console.error('Update error:', updateError)
-        throw new Error(`Failed to update sheet: ${updateError}`)
-      }
-
-      updateResult = await updateResponse.json()
-      console.log('Successfully synced to Google Sheets:', updateResult)
+    if (!clearResponse.ok) {
+      const clearError = await clearResponse.text()
+      console.error('Clear error:', clearError)
+      throw new Error(`Failed to clear sheet: ${clearError}`)
     }
 
-    // Update sync metadata
-    const currentTimestamp = new Date().toISOString()
-    const upsertResult = await supabase
-      .from('sync_metadata')
-      .upsert({
-        sync_type: 'elevator_pitches',
-        last_sync_timestamp: currentTimestamp,
-        last_sync_row_count: pitches.length,
-        sync_status: 'success',
-        error_details: null,
-        updated_at: currentTimestamp
-      }, {
-        onConflict: 'sync_type'
-      })
+    // Add new data
+    const updateResponse = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?valueInputOption=USER_ENTERED`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          values: sheetData
+        })
+      }
+    )
 
-    if (upsertResult.error) {
-      console.error('Error updating sync metadata:', upsertResult.error)
-      // Don't throw here as the sync was successful
-    } else {
-      console.log('Updated sync metadata successfully')
+    if (!updateResponse.ok) {
+      const updateError = await updateResponse.text()
+      console.error('Update error:', updateError)
+      throw new Error(`Failed to update sheet: ${updateError}`)
     }
+
+    const updateResult = await updateResponse.json()
+    console.log('Successfully synced to Google Sheets:', updateResult)
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `Successfully synced ${pitches.length} elevator pitches to Google Sheets`,
-        syncedCount: pitches.length,
-        isIncremental: isIncrementalSync,
-        syncType: isIncrementalSync ? 'incremental' : 'full'
+        message: `Successfully synced ${pitches?.length || 0} elevator pitches to Google Sheets`,
+        syncedCount: pitches?.length || 0
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -353,26 +234,6 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Sync error:', error)
-    
-    // Update sync metadata with error
-    try {
-      await supabase
-        .from('sync_metadata')
-        .upsert({
-          sync_type: 'elevator_pitches',
-          sync_status: 'failed',
-          error_details: { 
-            message: error.message, 
-            timestamp: new Date().toISOString() 
-          },
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'sync_type'
-        })
-    } catch (metaError) {
-      console.error('Failed to update error metadata:', metaError)
-    }
-    
     return new Response(
       JSON.stringify({
         success: false,
