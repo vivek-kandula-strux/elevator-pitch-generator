@@ -166,7 +166,7 @@ export default function GenerationResults({
               <button
                 onClick={onRegenerate}
                 disabled={isRegenerating}
-                className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-variation flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isRegenerating ? (
                   <>
