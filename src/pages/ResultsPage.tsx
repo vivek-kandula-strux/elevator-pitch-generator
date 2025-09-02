@@ -3,6 +3,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { GenerationResultsWithSuspense } from '@/components/lazy/LazyComponents';
 import { useElevatorPitchByToken, useRegenerateElevatorPitch } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
+import { SecureTokenManager } from '@/utils/secureTokenManager';
+import { SecurityHeaders } from '@/components/security/SecurityHeaders';
 
 // Lazy load MobileSlider since it contains animations
 const LazyMobileSlider = React.lazy(() => 
@@ -28,9 +30,8 @@ const ResultsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Get access token from URL params
-  const urlParams = new URLSearchParams(location.search);
-  const accessToken = urlParams.get('token');
+  // Get access token securely (removes from URL and stores in sessionStorage)
+  const accessToken = recordId ? SecureTokenManager.handleUrlToken(recordId) : null;
   
   const [formData, setFormData] = useState<FormData | null>(null);
   const [generationData, setGenerationData] = useState<GenerationData | null>(null);
@@ -136,11 +137,13 @@ const ResultsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle py-12 relative overflow-hidden">
-      {/* Background Enhancement */}
-      <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none"></div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
+    <>
+      <SecurityHeaders />
+      <div className="min-h-screen bg-gradient-subtle py-12 relative overflow-hidden">
+        {/* Background Enhancement */}
+        <div className="absolute inset-0 bg-gradient-glow opacity-30 pointer-events-none"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-float" style={{animationDelay: '3s'}}></div>
       
       <div className="container mx-auto relative z-10">
         <GenerationResultsWithSuspense 
@@ -157,6 +160,7 @@ const ResultsPage = () => {
         </Suspense>
       </div>
     </div>
+    </>
   );
 };
 
