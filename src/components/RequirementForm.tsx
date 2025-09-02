@@ -12,6 +12,7 @@ import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
 import { useGTMTracking } from '../hooks/useGTMTracking';
 import { useDebouncedInput } from '../hooks/useDebounce';
+import { getPhoneErrorMessage, formatPhoneInput, isValidPhoneNumber } from '../utils/phoneValidation';
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -77,8 +78,11 @@ const RequirementForm = React.memo(({ isOpen, onClose, preSelectedService }: Req
     }
     if (!formData.company.trim()) newErrors.company = 'Company is required';
     if (!formData.whatsapp.trim()) newErrors.whatsapp = 'WhatsApp is required';
-    else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
-      newErrors.whatsapp = 'Please enter a valid WhatsApp number';
+    else {
+      const phoneError = getPhoneErrorMessage(formData.whatsapp);
+      if (phoneError) {
+        newErrors.whatsapp = phoneError;
+      }
     }
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
     if (!formData.message.trim()) newErrors.message = 'Requirements are required';
@@ -106,6 +110,11 @@ const RequirementForm = React.memo(({ isOpen, onClose, preSelectedService }: Req
         company: formData.company,
         form_step: 'completed'
       });
+
+      // Validate phone number before submission
+      if (!isValidPhoneNumber(formData.whatsapp)) {
+        throw new Error('Invalid phone number format. Please provide a valid phone number.');
+      }
 
       // Store data in requirements table
       const { error } = await supabase

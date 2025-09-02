@@ -11,6 +11,7 @@ import { serviceCategories } from '@/data/serviceCategories';
 import { useSubmitRequirement } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
+import { getPhoneErrorMessage, formatPhoneInput } from '@/utils/phoneValidation';
 import Header from '@/components/Header';
 
 const ContactPage = () => {
@@ -46,8 +47,11 @@ const ContactPage = () => {
     }
     if (!formData.company.trim()) newErrors.company = 'Company is required';
     if (!formData.whatsapp.trim()) newErrors.whatsapp = 'WhatsApp is required';
-    else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.whatsapp.replace(/\s/g, ''))) {
-      newErrors.whatsapp = 'Please enter a valid WhatsApp number';
+    else {
+      const phoneError = getPhoneErrorMessage(formData.whatsapp);
+      if (phoneError) {
+        newErrors.whatsapp = phoneError;
+      }
     }
     if (!formData.serviceType) newErrors.serviceType = 'Please select a service';
     if (!formData.message.trim()) newErrors.message = 'Requirements are required';

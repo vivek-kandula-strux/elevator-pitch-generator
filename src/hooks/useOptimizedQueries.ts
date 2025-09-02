@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidPhoneNumber } from '@/utils/phoneValidation';
 
 // Query Keys for better cache management and deduplication
 export const queryKeys = {
@@ -120,6 +121,11 @@ export const useSubmitRequirement = () => {
 
   return useMutation({
     mutationFn: async (requirementData: any) => {
+      // Client-side phone validation
+      if (!isValidPhoneNumber(requirementData.whatsapp)) {
+        throw new Error('Invalid phone number format. Please provide a valid phone number.');
+      }
+
       // Insert requirement with specific columns only
       const { error } = await supabase
         .from('requirements')

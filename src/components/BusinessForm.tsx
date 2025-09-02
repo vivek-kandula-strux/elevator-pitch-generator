@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useGTMTracking } from '@/hooks/useGTMTracking';
 import { useDebouncedInput } from '@/hooks/useDebounce';
+import { getPhoneErrorMessage, formatPhoneInput } from '@/utils/phoneValidation';
 
 interface FormData {
   name: string;
@@ -64,8 +65,11 @@ const BusinessForm = React.memo(({
     }
     if (!formData.whatsapp.trim()) {
       newErrors.whatsapp = 'WhatsApp number is required';
-    } else if (!/^\+?[\d\s-()]+$/.test(formData.whatsapp)) {
-      newErrors.whatsapp = 'Please enter a valid phone number';
+    } else {
+      const phoneError = getPhoneErrorMessage(formData.whatsapp);
+      if (phoneError) {
+        newErrors.whatsapp = phoneError;
+      }
     }
     if (!formData.company.trim()) {
       newErrors.company = 'Company name is required';
