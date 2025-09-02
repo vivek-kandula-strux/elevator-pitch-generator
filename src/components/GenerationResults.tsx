@@ -156,11 +156,31 @@ export default function GenerationResults({
             </div>
           </div>
 
-          <div className="flex justify-center mb-8">
+          {/* Copy and Generate Variation Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <button onClick={handleCopy} className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
               <Copy className="w-5 h-5" />
               <span className="font-semibold">Copy Pitch</span>
             </button>
+            {onRegenerate && (
+              <button
+                onClick={onRegenerate}
+                disabled={isRegenerating}
+                className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRegenerating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                    <span className="font-semibold">Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-5 h-5" />
+                    <span className="font-semibold">Generate Variation</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Social Sharing Section */}
@@ -223,27 +243,7 @@ export default function GenerationResults({
       {/* Second Fold - Additional Actions and Guidelines */}
       <div className="pb-10">
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 md:mb-12">
-          {onRegenerate && (
-            <button
-              onClick={onRegenerate}
-              disabled={isRegenerating}
-              className="btn-primary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isRegenerating ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  <span className="font-medium">Generating Variation...</span>
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-5 h-5" />
-                  <span className="font-medium">Generate Variation</span>
-                </>
-              )}
-            </button>
-          )}
-          
+        <div className="flex justify-center mb-8 md:mb-12">
           <button onClick={onStartOver} className="btn-secondary flex items-center justify-center gap-3 px-6 py-4 min-h-[44px] w-full sm:w-auto">
             <RefreshCw className="w-5 h-5" />
             <span className="font-medium">Generate New Pitch</span>
