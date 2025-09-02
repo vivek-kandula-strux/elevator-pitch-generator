@@ -28,11 +28,17 @@ const ClientLogo = React.memo(({ logo, className }: { logo: { name: string; file
     // Fallback to a placeholder if image fails to load
     const target = e.target as HTMLImageElement;
     target.style.display = 'none';
-    target.parentElement!.innerHTML = `
-      <div class="w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm">
-        <span class="text-sm text-slate-700 font-medium">${logo.name}</span>
-      </div>
-    `;
+    
+    // Create safe error message element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'w-36 h-14 flex items-center justify-center bg-white/95 rounded-lg border border-slate-200/60 shadow-sm';
+    
+    const textSpan = document.createElement('span');
+    textSpan.className = 'text-sm text-slate-700 font-medium';
+    textSpan.textContent = logo.name; // Use textContent instead of innerHTML for security
+    
+    errorDiv.appendChild(textSpan);
+    target.parentElement?.appendChild(errorDiv);
   }, [logo.name]);
 
   return (

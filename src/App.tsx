@@ -14,6 +14,7 @@ import { ResourcePreloader } from "@/components/performance/ResourcePreloader";
 import { LazyFloatingWidget } from "@/components/lazy/OptimizedLazyComponents";
 import { WebVitalsMonitor } from "@/components/performance/WebVitalsMonitor";
 import { CriticalCSS } from "@/components/performance/CriticalCSS";
+import { SecurityHeaders } from "@/components/security/SecurityHeaders";
 
 // Lazy load ALL pages including FormPage for maximum performance
 const LazyFormPage = lazy(() => {
@@ -85,6 +86,7 @@ const App = () => {
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <TooltipProvider>
+        <SecurityHeaders />
         <Toaster />
         <Sonner />
         <BrowserRouter>
