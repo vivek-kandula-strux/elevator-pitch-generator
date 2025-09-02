@@ -115,6 +115,32 @@ export const useCreateElevatorPitch = () => {
   });
 };
 
+export const useRegenerateElevatorPitch = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ pitchId, accessToken }: { pitchId: string; accessToken: string }) => {
+      const { data, error } = await supabase.functions.invoke('regenerate-elevator-pitch', {
+        body: { pitchId, accessToken }
+      });
+      
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error('Failed to regenerate elevator pitch');
+      }
+      
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate the specific pitch query to refresh the data
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.elevatorPitches.detail(variables.pitchId, variables.accessToken) 
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.elevatorPitches.recent(10) });
+    },
+  });
+};
+
 // Optimized requirement submission mutation
 export const useSubmitRequirement = () => {
   const queryClient = useQueryClient();

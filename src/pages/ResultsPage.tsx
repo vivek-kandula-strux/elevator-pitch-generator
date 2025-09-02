@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { GenerationResultsWithSuspense } from '@/components/lazy/LazyComponents';
-import { useElevatorPitchByToken } from '@/hooks/useOptimizedQueries';
+import { useElevatorPitchByToken, useRegenerateElevatorPitch } from '@/hooks/useOptimizedQueries';
 import { useToast } from '@/hooks/use-toast';
 
 // Lazy load MobileSlider since it contains animations
@@ -40,6 +40,8 @@ const ResultsPage = () => {
     recordId || '', 
     accessToken || ''
   );
+  
+  const regenerateMutation = useRegenerateElevatorPitch();
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -92,6 +94,29 @@ const ResultsPage = () => {
     navigate('/');
   };
 
+  const handleRegenerate = async () => {
+    if (!recordId || !accessToken) return;
+    
+    try {
+      await regenerateMutation.mutateAsync({
+        pitchId: recordId,
+        accessToken: accessToken
+      });
+      
+      toast({
+        title: "Success!",
+        description: "Your elevator pitch variation has been generated.",
+      });
+    } catch (error) {
+      console.error('Regeneration error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate pitch variation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-subtle py-12 relative overflow-hidden">
@@ -122,6 +147,8 @@ const ResultsPage = () => {
           formData={formData}
           generationData={generationData}
           onStartOver={handleStartOver}
+          onRegenerate={handleRegenerate}
+          isRegenerating={regenerateMutation.isPending}
         />
         
         {/* Mobile Marketing Slider */}

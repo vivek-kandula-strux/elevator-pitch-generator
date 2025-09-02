@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.sync-to-google-sheets]
 verify_jwt = false
+
+[functions.regenerate-elevator-pitch]
+verify_jwt = false
