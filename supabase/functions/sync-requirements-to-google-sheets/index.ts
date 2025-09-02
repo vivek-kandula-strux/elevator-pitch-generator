@@ -93,12 +93,12 @@ const handler = async (req: Request): Promise<Response> => {
     const lastSyncTime = syncMeta?.last_sync_timestamp || '1970-01-01T00:00:00Z';
     console.log(`[Requirements Sync] Last sync: ${lastSyncTime}`);
 
-    // Fetch only new/updated records
+    // Fetch only new/updated records (use gte to prevent edge cases)
     const { data: requirements, error: fetchError } = await supabase
       .from('requirements')
       .select('*')
-      .or(`created_at.gt.${lastSyncTime},updated_at.gt.${lastSyncTime}`)
-      .order('created_at', { ascending: false })
+      .or(`created_at.gte.${lastSyncTime},updated_at.gte.${lastSyncTime}`)
+      .order('created_at', { ascending: true })
       .limit(100); // Batch limit
 
     if (fetchError) throw fetchError;
@@ -191,13 +191,20 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to update Google Sheet: ${err}`);
     }
 
-    // Update sync metadata
-    const now = new Date().toISOString();
+    // Update sync metadata with the latest record timestamp instead of current time
+    const latestTimestamp = requirements.reduce((latest, req) => {
+      const recordTime = Math.max(
+        new Date(req.created_at).getTime(),
+        new Date(req.updated_at || req.created_at).getTime()
+      );
+      return Math.max(latest, recordTime);
+    }, new Date(lastSyncTime).getTime());
+
     await supabase
       .from('sync_metadata')
       .upsert({
         sync_type: syncType,
-        last_sync_timestamp: now,
+        last_sync_timestamp: new Date(latestTimestamp).toISOString(),
         last_sync_row_count: requirements.length,
         sync_status: 'success'
       });
