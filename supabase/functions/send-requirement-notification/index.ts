@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { format } from 'npm:date-fns@3.6.0';
+import { toZonedTime } from 'npm:date-fns-tz@3.2.0';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -7,6 +9,13 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+};
+
+// IST timezone utility
+const formatIST = (date: Date | string): string => {
+  const utcDate = typeof date === 'string' ? new Date(date) : date;
+  const istDate = toZonedTime(utcDate, 'Asia/Kolkata');
+  return format(istDate, 'dd/MM/yyyy, hh:mm a');
 };
 
 interface RequirementNotificationRequest {
@@ -59,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-top: 20px;">
             <p style="margin: 0; color: #6c757d; font-size: 14px;">
-              <strong>Submitted:</strong> ${new Date().toLocaleString()}
+              <strong>Submitted:</strong> ${formatIST(new Date())}
             </p>
             <p style="margin: 5px 0 0 0; color: #6c757d; font-size: 14px;">
               This submission has also been automatically saved to Google Sheets.

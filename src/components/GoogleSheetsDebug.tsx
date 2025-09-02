@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatTimestampIST } from "@/utils/timezone";
 
 interface SyncResult {
   success: boolean;
@@ -30,7 +31,7 @@ export const GoogleSheetsDebug = () => {
       const result: SyncResult = {
         success: !error,
         message: error ? error.message : 'Elevator pitches synced successfully',
-        timestamp: new Date().toLocaleString(),
+        timestamp: formatTimestampIST(new Date()),
         details: data || error
       };
       
@@ -52,7 +53,7 @@ export const GoogleSheetsDebug = () => {
       const result: SyncResult = {
         success: false,
         message: err.message || 'Unknown error occurred',
-        timestamp: new Date().toLocaleString(),
+        timestamp: formatTimestampIST(new Date()),
         details: err
       };
       
@@ -77,7 +78,7 @@ export const GoogleSheetsDebug = () => {
       const result: SyncResult = {
         success: !error,
         message: error ? error.message : 'Requirements synced successfully',
-        timestamp: new Date().toLocaleString(),
+        timestamp: formatTimestampIST(new Date()),
         details: data || error
       };
       
@@ -99,7 +100,7 @@ export const GoogleSheetsDebug = () => {
       const result: SyncResult = {
         success: false,
         message: err.message || 'Unknown error occurred',
-        timestamp: new Date().toLocaleString(),
+        timestamp: formatTimestampIST(new Date()),
         details: err
       };
       

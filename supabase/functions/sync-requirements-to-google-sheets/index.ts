@@ -1,10 +1,19 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.0';
+import { format } from 'npm:date-fns@3.6.0';
+import { toZonedTime } from 'npm:date-fns-tz@3.2.0';
 
 // Standard CORS headers for web invocation
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// IST timezone utility
+const formatIST = (date: Date | string): string => {
+  const utcDate = typeof date === 'string' ? new Date(date) : date;
+  const istDate = toZonedTime(utcDate, 'Asia/Kolkata');
+  return format(istDate, 'dd/MM/yyyy HH:mm:ss');
 };
 
 // --- Helpers: base64url + PEM → ArrayBuffer + JWT signer ---
@@ -170,7 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
         r.whatsapp ?? '',
         r.service_type ?? '',
         r.message ?? '',
-        r.created_at ? new Date(r.created_at).toLocaleString() : '',
+        r.created_at ? formatIST(r.created_at) : '',
       ]);
       const values = [headerRow, ...dataRows];
 
@@ -188,7 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
         r.whatsapp ?? '',
         r.service_type ?? '',
         r.message ?? '',
-        r.created_at ? new Date(r.created_at).toLocaleString() : '',
+        r.created_at ? formatIST(r.created_at) : '',
       ]);
 
       appendRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${googleSheetId}/values/${encodeURIComponent(sheetName)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, {
