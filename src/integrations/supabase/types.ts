@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      circuit_breaker_state: {
+        Row: {
+          created_at: string
+          failure_count: number
+          failure_threshold: number
+          id: string
+          last_failure_at: string | null
+          last_success_at: string | null
+          recovery_timeout_minutes: number
+          service_name: string
+          state: string
+          success_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          failure_count?: number
+          failure_threshold?: number
+          id?: string
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          recovery_timeout_minutes?: number
+          service_name: string
+          state?: string
+          success_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          failure_count?: number
+          failure_threshold?: number
+          id?: string
+          last_failure_at?: string | null
+          last_success_at?: string | null
+          recovery_timeout_minutes?: number
+          service_name?: string
+          state?: string
+          success_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       elevator_pitches: {
         Row: {
           access_token: string
@@ -56,6 +98,138 @@ export type Database = {
         }
         Relationships: []
       }
+      job_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          job_type: string
+          max_retries: number
+          payload: Json
+          priority: number
+          retry_count: number
+          scheduled_at: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type: string
+          max_retries?: number
+          payload: Json
+          priority?: number
+          retry_count?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          max_retries?: number
+          payload?: Json
+          priority?: number
+          retry_count?: number
+          scheduled_at?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          id: string
+          metadata: Json | null
+          metric_type: string
+          service_name: string
+          timestamp: string
+          value: number
+        }
+        Insert: {
+          id?: string
+          metadata?: Json | null
+          metric_type: string
+          service_name: string
+          timestamp?: string
+          value: number
+        }
+        Update: {
+          id?: string
+          metadata?: Json | null
+          metric_type?: string
+          service_name?: string
+          timestamp?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          max_requests: number
+          request_count: number
+          updated_at: string
+          window_duration_minutes: number
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          max_requests?: number
+          request_count?: number
+          updated_at?: string
+          window_duration_minutes?: number
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          max_requests?: number
+          request_count?: number
+          updated_at?: string
+          window_duration_minutes?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       requirements: {
         Row: {
           company: string
@@ -92,14 +266,112 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_metadata: {
+        Row: {
+          created_at: string
+          error_details: Json | null
+          id: string
+          last_sync_row_count: number
+          last_sync_timestamp: string
+          sync_status: string
+          sync_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_details?: Json | null
+          id?: string
+          last_sync_row_count?: number
+          last_sync_timestamp?: string
+          sync_status?: string
+          sync_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_details?: Json | null
+          id?: string
+          last_sync_row_count?: number
+          last_sync_timestamp?: string
+          sync_status?: string
+          sync_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sync_record_tracking: {
+        Row: {
+          created_at: string
+          id: string
+          record_id: string
+          record_timestamp: string
+          sync_type: string
+          synced_at: string
+          table_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          record_id: string
+          record_timestamp: string
+          sync_type: string
+          synced_at?: string
+          table_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          record_id?: string
+          record_timestamp?: string
+          sync_type?: string
+          synced_at?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      cleanup_performance_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_elevator_pitch_by_token: {
         Args: { pitch_id: string; provided_token: string }
         Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       is_admin: {
         Args: Record<PropertyKey, never>
@@ -107,7 +379,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -234,6 +506,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

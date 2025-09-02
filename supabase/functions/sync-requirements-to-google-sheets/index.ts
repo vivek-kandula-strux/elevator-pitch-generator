@@ -93,7 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
     const lastSyncTime = syncMeta?.last_sync_timestamp || '1970-01-01T00:00:00Z';
     console.log(`[Requirements Sync] Last sync: ${lastSyncTime}`);
 
-    // Fetch only new/updated records (use gte to prevent edge cases)
+    // Fetch only new/updated records that haven't been synced yet
     const { data: requirements, error: fetchError } = await supabase
       .from('requirements')
       .select('*')
@@ -103,21 +103,34 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (fetchError) throw fetchError;
 
+    // Filter out already synced records
+    let newRequirements = requirements || [];
+    if (newRequirements.length > 0) {
+      const existingRecordIds = await supabase
+        .from('sync_record_tracking')
+        .select('record_id')
+        .eq('sync_type', 'requirements')
+        .in('record_id', newRequirements.map(r => r.id));
+
+      const syncedIds = new Set(existingRecordIds.data?.map(r => r.record_id) || []);
+      newRequirements = newRequirements.filter(r => !syncedIds.has(r.id));
+    }
+
     // Early return if no new records
-    if (!requirements || requirements.length === 0) {
+    if (!newRequirements || newRequirements.length === 0) {
       console.log('[Requirements Sync] No new records found');
       return new Response(JSON.stringify({ 
         success: true, 
         sheet: 'Requirements', 
         recordsProcessed: 0, 
-        incremental: true 
+        syncType: 'incremental' 
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
-    console.log(`[Requirements Sync] Found ${requirements.length} new/updated records`);
+    console.log(`[Requirements Sync] Found ${newRequirements.length} new/updated records`);
 
     // Google credentials
     const googleClientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL');
@@ -150,7 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       const headerRow = ['Name', 'Email', 'Company', 'WhatsApp', 'Service Type', 'Message', 'Created Date'];
-      const dataRows = requirements.map((r: any) => [
+      const dataRows = newRequirements.map((r: any) => [
         r.name ?? '',
         r.email ?? '',
         r.company ?? '',
@@ -168,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     } else {
       // Incremental sync: append only new data
-      const dataRows = requirements.map((r: any) => [
+      const dataRows = newRequirements.map((r: any) => [
         r.name ?? '',
         r.email ?? '',
         r.company ?? '',
@@ -191,8 +204,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to update Google Sheet: ${err}`);
     }
 
-    // Update sync metadata with the latest record timestamp instead of current time
-    const latestTimestamp = requirements.reduce((latest, req) => {
+    // Record which records have been synced to prevent duplicates
+    const trackingData = newRequirements.map(r => ({
+      sync_type: 'requirements',
+      record_id: r.id,
+      table_name: 'requirements',
+      record_timestamp: r.updated_at || r.created_at
+    }));
+
+    await supabase.from('sync_record_tracking').upsert(trackingData, { onConflict: 'sync_type,record_id' });
+
+    // Update sync metadata with the latest record timestamp
+    const latestTimestamp = newRequirements.reduce((latest, req) => {
       const recordTime = Math.max(
         new Date(req.created_at).getTime(),
         new Date(req.updated_at || req.created_at).getTime()
@@ -205,7 +228,7 @@ const handler = async (req: Request): Promise<Response> => {
       .upsert({
         sync_type: syncType,
         last_sync_timestamp: new Date(latestTimestamp).toISOString(),
-        last_sync_row_count: requirements.length,
+        last_sync_row_count: newRequirements.length,
         sync_status: 'success'
       });
 
@@ -214,7 +237,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ 
       success: true, 
       sheet: sheetName, 
-      recordsProcessed: requirements.length,
+      recordsProcessed: newRequirements.length,
       syncType: isFirstSync ? 'full' : 'incremental'
     }), {
       status: 200,

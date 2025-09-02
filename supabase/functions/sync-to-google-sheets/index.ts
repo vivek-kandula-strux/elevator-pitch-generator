@@ -100,7 +100,7 @@ serve(async (req: Request) => {
     const lastSyncTime = syncMeta?.last_sync_timestamp || '1970-01-01T00:00:00Z';
     console.log(`[ElevatorPitches Sync] Last sync: ${lastSyncTime}`);
 
-    // Fetch only new/updated records (use gte to prevent edge cases)
+    // Fetch only new/updated records that haven't been synced yet
     const { data: pitches, error } = await supabase
       .from('elevator_pitches')
       .select('*')
@@ -110,16 +110,29 @@ serve(async (req: Request) => {
 
     if (error) throw error;
 
+    // Filter out already synced records
+    let newPitches = pitches || [];
+    if (newPitches.length > 0) {
+      const existingRecordIds = await supabase
+        .from('sync_record_tracking')
+        .select('record_id')
+        .eq('sync_type', 'elevator_pitches')
+        .in('record_id', newPitches.map(p => p.id));
+
+      const syncedIds = new Set(existingRecordIds.data?.map(r => r.record_id) || []);
+      newPitches = newPitches.filter(p => !syncedIds.has(p.id));
+    }
+
     // Early return if no new records
-    if (!pitches || pitches.length === 0) {
+    if (!newPitches || newPitches.length === 0) {
       console.log('[ElevatorPitches Sync] No new records found');
       return new Response(
-        JSON.stringify({ success: true, sheet: 'ElevatorPitches', recordsProcessed: 0, incremental: true }),
+        JSON.stringify({ success: true, sheet: 'ElevatorPitches', recordsProcessed: 0, syncType: 'incremental' }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
-    console.log(`[ElevatorPitches Sync] Found ${pitches.length} new/updated records`);
+    console.log(`[ElevatorPitches Sync] Found ${newPitches.length} new/updated records`);
 
     const clientEmail = Deno.env.get('GOOGLE_SHEETS_CLIENT_EMAIL');
     const privateKey = Deno.env.get('GOOGLE_SHEETS_PRIVATE_KEY')?.replace(/\\n/g, '\n');
@@ -149,7 +162,7 @@ serve(async (req: Request) => {
       });
 
       const headerRow = ['Name', 'Company', 'Category', 'WhatsApp', 'USP', 'Specific Ask', 'Generated Pitch', 'Created Date'];
-      const dataRows = pitches.map((p: ElevatorPitch) => [
+      const dataRows = newPitches.map((p: ElevatorPitch) => [
         p.name ?? '',
         p.company ?? '',
         p.category ?? '',
@@ -168,7 +181,7 @@ serve(async (req: Request) => {
       });
     } else {
       // Incremental sync: append only new data
-      const dataRows = pitches.map((p: ElevatorPitch) => [
+      const dataRows = newPitches.map((p: ElevatorPitch) => [
         p.name ?? '',
         p.company ?? '',
         p.category ?? '',
@@ -192,8 +205,18 @@ serve(async (req: Request) => {
       throw new Error(`Failed to update Google Sheet: ${err}`);
     }
 
-    // Update sync metadata with the latest record timestamp instead of current time
-    const latestTimestamp = pitches.reduce((latest, pitch) => {
+    // Record which records have been synced to prevent duplicates
+    const trackingData = newPitches.map(p => ({
+      sync_type: 'elevator_pitches',
+      record_id: p.id,
+      table_name: 'elevator_pitches',
+      record_timestamp: p.updated_at || p.created_at
+    }));
+
+    await supabase.from('sync_record_tracking').upsert(trackingData, { onConflict: 'sync_type,record_id' });
+
+    // Update sync metadata with the latest record timestamp
+    const latestTimestamp = newPitches.reduce((latest, pitch) => {
       const recordTime = Math.max(
         new Date(pitch.created_at).getTime(),
         new Date(pitch.updated_at || pitch.created_at).getTime()
@@ -206,7 +229,7 @@ serve(async (req: Request) => {
       .upsert({
         sync_type: syncType,
         last_sync_timestamp: new Date(latestTimestamp).toISOString(),
-        last_sync_row_count: pitches.length,
+        last_sync_row_count: newPitches.length,
         sync_status: 'success'
       });
 
@@ -216,7 +239,7 @@ serve(async (req: Request) => {
       JSON.stringify({ 
         success: true, 
         sheet: sheetName, 
-        recordsProcessed: pitches.length,
+        recordsProcessed: newPitches.length,
         syncType: isFirstSync ? 'full' : 'incremental'
       }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
