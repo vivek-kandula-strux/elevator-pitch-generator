@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { isValidPhoneNumber } from '@/utils/phoneValidation';
+import { securityMonitor } from '@/utils/securityMonitor';
+import { isValidUUID, RateLimiter } from '@/utils/inputValidation';
 
 // Query Keys for better cache management and deduplication
 export const queryKeys = {
@@ -21,13 +23,34 @@ export const queryKeys = {
   },
 } as const;
 
-// Optimized elevator pitch queries with specific column selection
 export const useElevatorPitchByToken = (pitchId: string, accessToken: string) => {
   return useQuery({
     queryKey: queryKeys.elevatorPitches.detail(pitchId, accessToken),
     queryFn: async () => {
       if (!pitchId || !accessToken) {
+        securityMonitor.logEvent('token_access', 'error', 'Missing required credentials', {
+          hasPitchId: !!pitchId,
+          hasToken: !!accessToken
+        });
         throw new Error('Pitch ID and access token are required');
+      }
+
+      // Validate UUID format for security
+      if (!isValidUUID(pitchId) || !isValidUUID(accessToken)) {
+        securityMonitor.logEvent('token_access', 'error', 'Invalid UUID format', {
+          pitchId: pitchId.substring(0, 8) + '...',
+          tokenPrefix: accessToken.substring(0, 8) + '...'
+        });
+        throw new Error('Invalid ID format');
+      }
+
+      // Rate limiting check
+      const rateLimitKey = `pitch_access_${pitchId}`;
+      if (!RateLimiter.isAllowed(rateLimitKey, 10, 60000)) { // 10 requests per minute
+        securityMonitor.logEvent('rate_limit', 'warn', 'Rate limit exceeded for pitch access', {
+          pitchId: pitchId.substring(0, 8) + '...'
+        });
+        throw new Error('Rate limit exceeded. Please try again later.');
       }
 
       const { data, error } = await supabase
@@ -36,8 +59,24 @@ export const useElevatorPitchByToken = (pitchId: string, accessToken: string) =>
           provided_token: accessToken
         });
 
-      if (error) throw error;
-      if (!data) throw new Error('No data found');
+      if (error) {
+        securityMonitor.logEvent('api_error', 'error', 'Database query failed', {
+          function: 'get_elevator_pitch_by_token',
+          error: error.message
+        });
+        throw error;
+      }
+      
+      if (!data) {
+        securityMonitor.logEvent('token_access', 'warn', 'No data found for valid credentials', {
+          pitchId: pitchId.substring(0, 8) + '...'
+        });
+        throw new Error('No data found');
+      }
+
+      securityMonitor.logEvent('token_access', 'info', 'Successful pitch access', {
+        pitchId: pitchId.substring(0, 8) + '...'
+      });
 
       return data;
     },
